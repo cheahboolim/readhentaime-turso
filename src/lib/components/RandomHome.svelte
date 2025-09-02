@@ -22,8 +22,8 @@
 
 <div class="py-10 px-4 bg-background text-foreground min-h-screen">
 	<div class="text-center mb-6">
-		<h2 class="text-2xl font-bold mb-2">For You</h2>
-		<p class="text-foreground/70 text-sm">Popular picks from our community 🔥</p>
+		<h2 class="text-2xl font-bold mb-2">Feeling Lucky?</h2>
+		<p class="text-foreground/70 text-sm">Currently Trending Hentai 🔥</p>
 	</div>
 
 	{#if comics.length === 0}
