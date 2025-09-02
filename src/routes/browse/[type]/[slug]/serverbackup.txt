@@ -250,9 +250,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
 						position: (page - 1) * PAGE_SIZE + index + 1,
 						item: {
 							'@type': 'Book',
-							'@id': `https://readhentai.me/hentai/${comic.slug}`,
+							'@id': `https://readhentai.me/read/${comic.slug}`,
 							name: comic.title,
-							url: `https://readhentai.me/hentai/${comic.slug}`,
+							url: `https://readhentai.me/read/${comic.slug}`,
 							image: comic.featureImage,
 							author: {
 								'@type': 'Person',

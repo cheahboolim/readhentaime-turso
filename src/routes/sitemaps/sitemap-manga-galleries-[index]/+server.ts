@@ -43,7 +43,7 @@ export async function GET({ params }) {
 					: new Date().toISOString().split('T')[0]
 
 				urls.push({
-					loc: `${SITE_URL}/hentai/${item.slug}`,
+					loc: `${SITE_URL}/read/${item.slug}`,
 					lastmod,
 					changefreq: 'monthly',
 					priority: '0.7'

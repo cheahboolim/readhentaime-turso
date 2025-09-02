@@ -14,7 +14,7 @@
 
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
   {#each visibleImages as imgUrl, i}
-    <a href={`/hentai/${comicSlug}/${i + 1}`} title={`Page ${i + 1}`}>
+    <a href={`/read/${comicSlug}/${i + 1}`} title={`Page ${i + 1}`}>
       <img
         src={imgUrl}
         alt={`Preview page ${i + 1}`}

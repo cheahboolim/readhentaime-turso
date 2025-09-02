@@ -206,13 +206,13 @@
 		<!-- Enhanced SEO Content Section -->
 		<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
 			<h2 class="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-200">
-				About {data.name}
+				Read Full {data.name} | HentaiRead.Me
 				{data.typeLabel}
 			</h2>
 			<div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed space-y-2">
 				{#if data.type === 'tags'}
 					<p>
-						Discover <strong>{data.totalManga} premium {data.name} hentai manga</strong> in our
+						Discover <strong>{data.totalManga} premium {data.name} hentai</strong> in our
 						curated collection. This tag features high-quality adult doujinshi with detailed artwork
 						and engaging storylines.
 						{#if data.popularContent.characters.length > 0}
@@ -358,7 +358,7 @@
 				{#each data.comics as comic, index}
 					<article class="group">
 						<a
-							href={`/hentai/${comic.slug}`}
+							href={`/read/${comic.slug}`}
 							class="block hover:opacity-90 transition-opacity duration-200 focus:ring-2 focus:ring-pink-500 focus:outline-none rounded-lg"
 							aria-label="Read {comic.title}"
 						>

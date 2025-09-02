@@ -4,7 +4,7 @@ export async function GET() {
 Allow: /
 
 # Important content sections
-Allow: /hentai/
+Allow: /read/
 Allow: /browse/
 Allow: /p/
 

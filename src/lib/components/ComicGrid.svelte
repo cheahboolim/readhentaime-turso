@@ -17,7 +17,7 @@
 		<div
 			class="bg-card overflow-hidden rounded-lg shadow group hover:shadow-lg transition-shadow duration-200"
 		>
-			<a href={`/hentai/${comic.slug}`}>
+			<a href={`/read/${comic.slug}`}>
 				<div class="relative aspect-[3/4] overflow-hidden">
 					<img
 						src={comic.featureImage || '/placeholder.svg'}
@@ -28,7 +28,7 @@
 				</div>
 			</a>
 			<div class="p-4">
-				<a href={`/hentai/${comic.slug}`} class="hover:underline">
+				<a href={`/read/${comic.slug}`} class="hover:underline">
 					<h3 class="font-bold text-foreground truncate">{comic.title}</h3>
 				</a>
 			</div>

@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Important content sections
-Allow: /hentai/
+Allow: /read/
 Allow: /browse/
 Allow: /p/
 

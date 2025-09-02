@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-//src/routes/hentai/[slug]/+page.server.ts - FULLY OPTIMIZED
+//src/routes/read/[slug]/+page.server.ts - FULLY OPTIMIZED
 import { error } from '@sveltejs/kit'
 import { supabase } from '$lib/supabaseClient'
 
@@ -248,7 +248,7 @@ export async function load({ params }) {
 		seo: {
 			title: `${manga.title}${topCharacters.length > 0 ? ` - ${topCharacters[0]}` : ''}${topParody ? ` ${topParody} Parody` : ''} | Free Hentai Manga`,
 			description: generateSEODescription(),
-			canonical: `https://readhentai.me/hentai/${slug}`,
+			canonical: `https://readhentai.me/read/${slug}`,
 			keywords,
 			// Enhanced Open Graph
 			ogTitle: socialTitle,
@@ -274,7 +274,7 @@ export async function load({ params }) {
 				'@type': 'Book',
 				name: manga.title,
 				description: socialDescription,
-				url: `https://readhentai.me/hentai/${slug}`,
+				url: `https://readhentai.me/read/${slug}`,
 				image: manga.feature_image_url,
 				datePublished: manga.created_at,
 				numberOfPages: totalPages,

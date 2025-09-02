@@ -1,4 +1,4 @@
-<!-- src/routes/hentai/[slug]/[page]/+page.svelte - FIXED VERSION -->
+<!-- src/routes/read/[slug]/[page]/+page.svelte - FIXED VERSION -->
 <script lang="ts">
 	import { page } from '$app/stores'
 	import { goto } from '$app/navigation'
@@ -145,8 +145,8 @@
 		trackPageView()
 
 		// Preload next and previous page images
-		const nextPageUrl = `/hentai/${slug}/${currentPage + 1}`
-		const prevPageUrl = `/hentai/${slug}/${currentPage - 1}`
+		const nextPageUrl = `/read/${slug}/${currentPage + 1}`
+		const prevPageUrl = `/read/${slug}/${currentPage - 1}`
 
 		if (currentPage < totalPages) {
 			fetch(nextPageUrl).catch(() => {})
@@ -184,7 +184,7 @@
 				})
 			}
 
-			goto(`/hentai/${slug}/${n}`, {
+			goto(`/read/${slug}/${n}`, {
 				replaceState: false,
 				keepFocus: true,
 				invalidateAll: true
@@ -332,7 +332,7 @@
 		<ol class="flex items-center space-x-2 text-sm text-gray-300">
 			<li><a href="/" class="hover:text-white">Home</a></li>
 			<li class="text-gray-500">›</li>
-			<li><a href={`/hentai/${slug}`} class="hover:text-white">Gallery</a></li>
+			<li><a href={`/read/${slug}`} class="hover:text-white">Gallery</a></li>
 			<li class="text-gray-500">›</li>
 			<li class="text-white font-medium">Read Online</li>
 		</ol>
@@ -341,7 +341,7 @@
 	<!-- Top navigation -->
 	<div class="mb-6 flex flex-wrap gap-4 items-center justify-between">
 		<a
-			href={`/hentai/${slug}`}
+			href={`/read/${slug}`}
 			class="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors"
 		>
 			← Back to Gallery
@@ -545,7 +545,7 @@
 	<!-- Bottom navigation -->
 	<nav class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 mb-8">
 		<a
-			href={`/hentai/${slug}`}
+			href={`/read/${slug}`}
 			class="px-6 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors"
 		>
 			📖 Back to Gallery

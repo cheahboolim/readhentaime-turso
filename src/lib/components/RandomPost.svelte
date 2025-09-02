@@ -5,7 +5,7 @@
 	$: displayComics = comics.slice(0, 8)
 
 	function navigateToComic(slug: string) {
-		window.location.href = `/hentai/${slug}`
+		window.location.href = `/read/${slug}`
 	}
 </script>
 

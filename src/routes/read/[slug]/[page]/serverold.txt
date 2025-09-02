@@ -1,6 +1,6 @@
 /* New File */
 /* eslint-disable prettier/prettier */
-// src/routes/hentai/[slug]/[page]/+page.server.ts
+// src/routes/read/[slug]/[page]/+page.server.ts
 import { error } from '@sveltejs/kit';
 import { supabase } from '$lib/supabaseClient';
 
@@ -196,9 +196,9 @@ export async function load({ params, url: _url }) {
   ].filter(Boolean).join(', ');
 
   // Canonical and navigation URLs
-  const canonical = `https://readhentai.me/hentai/${slug}/${pageNum}`;
-  const prev = pageNum > 1 ? `/hentai/${slug}/${pageNum - 1}` : undefined;
-  const next = pageNum < totalPages ? `/hentai/${slug}/${pageNum + 1}` : undefined;
+  const canonical = `https://readhentai.me/read/${slug}/${pageNum}`;
+  const prev = pageNum > 1 ? `/read/${slug}/${pageNum - 1}` : undefined;
+  const next = pageNum < totalPages ? `/read/${slug}/${pageNum + 1}` : undefined;
 
   // Enhanced images array with SEO data
   const enhancedImages = pages.map((p, index) => ({
@@ -265,7 +265,7 @@ export async function load({ params, url: _url }) {
         "@type": "ComicSeries",
         "name": manga.title,
         "description": socialDescription,
-        "url": `https://readhentai.me/hentai/${slug}`,
+        "url": `https://readhentai.me/read/${slug}`,
         "image": enhancedImages[0]?.url || manga.feature_image_url,
         "genre": topTags,
         "character": topCharacters,

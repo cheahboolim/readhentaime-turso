@@ -36,7 +36,7 @@ export class SEOManager {
 				? `Read ${baseTitle} manga online for free at Read Hentai. High quality translated manga with fast updates.${manga.tagNames?.length ? ` Available genres: ${manga.tagNames.slice(0, 3).join(', ')}.` : ''}`
 				: `Continue reading ${baseTitle} - Page ${page} at Read Hentai. Free online manga reader with high quality images and fast loading.`
 
-		const canonical = `https://readhentai.me/hentai/${slug}/${page}`
+		const canonical = `https://readhentai.me/read/${slug}/${page}`
 
 		return {
 			title,
@@ -50,14 +50,14 @@ export class SEOManager {
 			ogImage: currentImage || '/default-manga-cover.jpg',
 			ogType: 'article',
 			twitterCard: 'summary_large_image',
-			prev: page > 1 ? `/hentai/${slug}/${page - 1}` : undefined,
-			next: page < totalPages ? `/hentai/${slug}/${page + 1}` : undefined,
+			prev: page > 1 ? `/read/${slug}/${page - 1}` : undefined,
+			next: page < totalPages ? `/read/${slug}/${page + 1}` : undefined,
 			jsonLd: {
 				'@context': 'https://schema.org',
 				'@type': 'ComicSeries',
 				name: manga.title,
 				description: description,
-				url: `https://readhentai.me/hentai/${slug}`,
+				url: `https://readhentai.me/read/${slug}`,
 				image: currentImage,
 				genre: manga.tagNames,
 				numberOfEpisodes: totalPages,

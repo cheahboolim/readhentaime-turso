@@ -66,7 +66,7 @@
 
 	function goToPage(pageIndex: number) {
 		isNavigating = true;
-		const url = `/hentai/${slug}/read?page=${pageIndex}`;
+		const url = `/read/${slug}/read?page=${pageIndex}`;
 		goto(url);
 	}
 
