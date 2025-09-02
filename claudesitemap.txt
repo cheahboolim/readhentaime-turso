@@ -1,7 +1,7 @@
 // src/routes/sitemap.xml/+server.ts - MAIN INDEX
 import { supabase } from '$lib/supabaseClient';
 
-const SITE_URL = 'https://nhentai.pics';
+const SITE_URL = 'https://readhentai.me';
 const URLS_PER_SITEMAP = 25000;
 
 export async function GET() {
@@ -103,7 +103,7 @@ ${fallbackSitemaps.map(sitemap => `  <sitemap>
 
 import { supabase } from '$lib/supabaseClient';
 
-const SITE_URL = 'https://nhentai.pics';
+const SITE_URL = 'https://readhentai.me';
 const PAGE_SIZE = 10;
 const MAX_PAGES_PER_CATEGORY = 500; // Increased limit
 
@@ -216,7 +216,7 @@ ${urls.map(url => `  <url>
 
 import { supabase } from '$lib/supabaseClient';
 
-const SITE_URL = 'https://nhentai.pics';
+const SITE_URL = 'https://readhentai.me';
 const URLS_PER_SITEMAP = 25000;
 
 interface SitemapUrl {
@@ -301,7 +301,7 @@ ${urls.map(url => `  <url>
 
 import { supabase } from '$lib/supabaseClient';
 
-const SITE_URL = 'https://nhentai.pics';
+const SITE_URL = 'https://readhentai.me';
 const URLS_PER_SITEMAP = 25000;
 
 interface SitemapUrl {

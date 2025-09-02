@@ -11,7 +11,7 @@ Disallow: /api/
 Disallow: /admin/
 
 # Sitemap locations
-Sitemap: https://nhentai.pics/sitemap.xml
+Sitemap: https://readhentai.me/sitemap.xml
 
 # Crawl-delay for respectful crawling
 Crawl-delay: 1

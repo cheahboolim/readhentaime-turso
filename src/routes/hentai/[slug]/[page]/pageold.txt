@@ -127,7 +127,7 @@
           'item_id': `${slug}_page_${currentPage}`,
           'item_name': `${manga.title} - Page ${currentPage}`,
           'item_category': 'comic',
-          'item_brand': 'NHentai',
+          'item_brand': 'Read Hentai',
           'item_variant': `page_${currentPage}`,
           'quantity': 1,
           'price': 0.001
@@ -273,8 +273,8 @@
   // Dynamic page title for browser tab
   let pageTitle: string;
   $: pageTitle = currentPage === 1
-    ? `Read ${manga.title} Online Free - Chapter ${currentPage} | NHentai`
-    : `${manga.title} - Page ${currentPage} Online Reader | NHentai`;
+    ? `Read ${manga.title} Online Free - Chapter ${currentPage} | Read Hentai`
+    : `${manga.title} - Page ${currentPage} Online Reader | Read Hentai`;
 </script>
 
 <svelte:head>
@@ -324,7 +324,7 @@
   
   <!-- Additional SEO -->
   <meta name="robots" content="index, follow, max-image-preview:large" />
-  <meta name="author" content={manga.seoData.primaryArtist || 'NHentai Pics'} />
+  <meta name="author" content={manga.seoData.primaryArtist || 'Read Hentai Pics'} />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <!-- Pagination -->
@@ -566,7 +566,7 @@
       href="/"
       class="px-6 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors"
     >
-      🏠 Back to nhentai.pics
+      🏠 Back to readhentai.me
     </a>
   </nav>
 

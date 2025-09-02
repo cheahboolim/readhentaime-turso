@@ -6,7 +6,7 @@
   <div class="container flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm">
     <!-- Text -->
     <p class="text-center md:text-left leading-loose">
-      &copy; {year} NHentai. All rights reserved.
+      &copy; {year} Read Hentai. All rights reserved.
     </p>
 
     <!-- Links -->
@@ -16,7 +16,7 @@
       <a href="/p/upload" class="hover:underline">Upload</a>
       <a href="https://tally.so/r/waXOeB" target="_blank" class="hover:underline">DMCA</a>
       <a href="https://tally.so/r/3Eervr" target="_blank" class="hover:underline">Suggestions</a>
-      <a href="/" class="hover:underline">nhentai.pics</a>
+      <a href="/" class="hover:underline">readhentai.me</a>
     </div>
   </div>
 </footer>

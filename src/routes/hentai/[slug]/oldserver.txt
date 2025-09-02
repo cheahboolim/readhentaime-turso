@@ -222,14 +222,14 @@ export async function load({ params }) {
 		seo: {
 			title: `${manga.title}${topCharacters.length > 0 ? ` - ${topCharacters[0]}` : ''}${topParody ? ` ${topParody} Parody` : ''} | Free Hentai Manga`,
 			description: generateSEODescription(),
-			canonical: `https://nhentai.pics/hentai/${slug}`,
+			canonical: `https://readhentai.me/hentai/${slug}`,
 			keywords,
 			// Enhanced Open Graph
 			ogTitle: socialTitle,
 			ogDescription: socialDescription,
 			ogImage: manga.feature_image_url,
 			ogType: 'article',
-			ogSiteName: 'NHentai Pics - Free Adult Manga',
+			ogSiteName: 'Read Hentai Pics - Free Adult Manga',
 			ogLocale: 'en_US',
 			// Article specific OG tags
 			articleAuthor: primaryArtist,
@@ -241,14 +241,14 @@ export async function load({ params }) {
 			twitterTitle: socialTitle,
 			twitterDescription: socialDescription,
 			twitterImage: manga.feature_image_url,
-			twitterSite: '@nhentaipics',
+			twitterSite: '@Read Hentaipics',
 			// Enhanced structured data
 			structuredData: {
 				'@context': 'https://schema.org',
 				'@type': 'Book',
 				name: manga.title,
 				description: socialDescription,
-				url: `https://nhentai.pics/hentai/${slug}`,
+				url: `https://readhentai.me/hentai/${slug}`,
 				image: manga.feature_image_url,
 				datePublished: manga.created_at,
 				numberOfPages: totalPages,
@@ -261,8 +261,8 @@ export async function load({ params }) {
 				},
 				publisher: {
 					'@type': 'Organization',
-					name: 'NHentai Pics',
-					url: 'https://nhentai.pics'
+					name: 'Read Hentai Pics',
+					url: 'https://readhentai.me'
 				},
 				offers: {
 					'@type': 'Offer',

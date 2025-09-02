@@ -9,8 +9,8 @@ export default defineConfig({
 			registerType: 'autoUpdate',
 			includeAssets: ['favicon.ico', 'pwa-icon-192.png', 'pwa-icon-512.png'],
 			manifest: {
-				name: 'NHentai',
-				short_name: 'NHentai',
+				name: 'Read Hentai',
+				short_name: 'Read Hentai',
 				start_url: '/?utm_source=pwa&utm_medium=pwa&utm_campaign=install',
 				display: 'standalone',
 				background_color: '#000000',
@@ -32,7 +32,7 @@ export default defineConfig({
 	],
 	server: {
 		host: true,
-		allowedHosts: ['nhentai.pics', 's.nhentai.pics']
+		allowedHosts: ['readhentai.me', 's.readhentai.me']
 	},
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']

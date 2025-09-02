@@ -196,7 +196,7 @@ export async function load({ params, url: _url }) {
   ].filter(Boolean).join(', ');
 
   // Canonical and navigation URLs
-  const canonical = `https://nhentai.pics/hentai/${slug}/${pageNum}`;
+  const canonical = `https://readhentai.me/hentai/${slug}/${pageNum}`;
   const prev = pageNum > 1 ? `/hentai/${slug}/${pageNum - 1}` : undefined;
   const next = pageNum < totalPages ? `/hentai/${slug}/${pageNum + 1}` : undefined;
 
@@ -234,7 +234,7 @@ export async function load({ params, url: _url }) {
     // Comprehensive SEO metadata for server-side rendering
     seo: {
       title: pageNum === 1 ? 
-        `Read ${manga.title} Online Free${topCharacters.length > 0 ? ` - ${topCharacters[0]}` : ''} | Chapter 1 | NHentai` :
+        `Read ${manga.title} Online Free${topCharacters.length > 0 ? ` - ${topCharacters[0]}` : ''} | Chapter 1 | Read Hentai` :
         `${manga.title} - Page ${pageNum}${topCharacters.length > 0 ? ` | ${topCharacters[0]}` : ''} | Free Online Reader`,
       description: generateSEODescription(),
       canonical,
@@ -246,7 +246,7 @@ export async function load({ params, url: _url }) {
       ogDescription: socialDescription,
       ogImage: enhancedImages[0]?.url || manga.feature_image_url,
       ogType: 'article',
-      ogSiteName: 'NHentai Pics - Free Adult Manga Reader',
+      ogSiteName: 'Read Hentai Pics - Free Adult Manga Reader',
       ogLocale: 'en_US',
       // Article-specific OG tags
       articleAuthor: primaryArtist,
@@ -258,14 +258,14 @@ export async function load({ params, url: _url }) {
       twitterTitle: socialTitle,
       twitterDescription: socialDescription,
       twitterImage: enhancedImages[0]?.url || manga.feature_image_url,
-      twitterSite: '@nhentaipics',
+      twitterSite: '@Read Hentaipics',
       // Enhanced JSON-LD structured data
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "ComicSeries",
         "name": manga.title,
         "description": socialDescription,
-        "url": `https://nhentai.pics/hentai/${slug}`,
+        "url": `https://readhentai.me/hentai/${slug}`,
         "image": enhancedImages[0]?.url || manga.feature_image_url,
         "genre": topTags,
         "character": topCharacters,
@@ -273,8 +273,8 @@ export async function load({ params, url: _url }) {
         "datePublished": manga.created_at,
         "publisher": {
           "@type": "Organization",
-          "name": "NHentai Pics",
-          "url": "https://nhentai.pics"
+          "name": "Read Hentai Pics",
+          "url": "https://readhentai.me"
         },
         "author": {
           "@type": "Person", 

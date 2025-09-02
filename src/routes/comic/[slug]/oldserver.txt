@@ -132,7 +132,7 @@ export async function load({ params }) {
 
   // 8) Generate comprehensive SEO metadata on server-side
   const baseTitle = manga.title;
-  const siteTitle = "NHentai";
+  const siteTitle = "Read Hentai";
   const separator = " | ";
   
   // More descriptive and unique titles
@@ -142,11 +142,11 @@ export async function load({ params }) {
 
   // Rich description with more context
   const seoDescription = pageNum === 1
-    ? `Read ${baseTitle} manga online for free at NHentai. High quality translated manga with fast updates.${tagNames.length > 0 ? ` Available genres: ${tagNames.slice(0, 3).join(', ')}.` : ''}`
-    : `Continue reading ${baseTitle} - Page ${pageNum} at NHentai. Free online manga reader with high quality images and fast loading.`;
+    ? `Read ${baseTitle} manga online for free at Read Hentai. High quality translated manga with fast updates.${tagNames.length > 0 ? ` Available genres: ${tagNames.slice(0, 3).join(', ')}.` : ''}`
+    : `Continue reading ${baseTitle} - Page ${pageNum} at Read Hentai. Free online manga reader with high quality images and fast loading.`;
 
   // Canonical URL - Updated for new structure
-  const canonical = `https://nhentai.pics/comic/${slug}/${pageNum}/`;
+  const canonical = `https://readhentai.me/comic/${slug}/${pageNum}/`;
 
   // Pagination links - Updated for new structure
   const prev = pageNum > 1
@@ -166,14 +166,14 @@ export async function load({ params }) {
     "@type": "ComicSeries",
     "name": manga.title,
     "description": seoDescription,
-    "url": `https://nhentai.pics/comic/${slug}`,
+    "url": `https://readhentai.me/comic/${slug}`,
     "image": ogImage,
     "genre": tagNames,
     "numberOfEpisodes": totalPages,
     "publisher": {
       "@type": "Organization",
       "name": siteTitle,
-      "url": "`https://nhentai.pics"
+      "url": "`https://readhentai.me"
     }
   };
 

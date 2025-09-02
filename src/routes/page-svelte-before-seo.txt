@@ -20,11 +20,11 @@
 	<meta property="og:title" content={data.meta.title} />
 	<meta property="og:description" content={data.meta.description} />
 	<meta property="og:type" content="website" />
-	<meta property="og:site_name" content="NHentai" />
+	<meta property="og:site_name" content="Read Hentai" />
 	
 	<!-- Twitter Card -->
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:image" content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/NHentai-home-image.jpg" />
+	<meta name="twitter:image" content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/Read Hentai-home-image.jpg" />
 	<meta name="twitter:title" content={data.meta.title} />
 	<meta name="twitter:description" content={data.meta.description} />
 </svelte:head>

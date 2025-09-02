@@ -1,44 +1,23 @@
 <script>
 	// Keep your existing imports
-	import { browser } from '$app/environment';
-	import '../app.css';
-	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
-	import { afterNavigate } from '$app/navigation';
-	import { seo } from '$lib/seo.ts';
+	import { browser } from '$app/environment'
+	import '../app.css'
+	import { onMount } from 'svelte'
+	import { page } from '$app/stores'
+	import { afterNavigate } from '$app/navigation'
+	import { seo } from '$lib/seo.ts'
 	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte'
-	import MainNav from '$lib/components/MainNav.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import BannerAd from '$lib/components/adsterra/BannerAd.svelte';
-	import BlueBallsAd from '$lib/components/ownads/BlueBallsAd.svelte';
-	import AppInstallBanner from '$lib/components/AppInstallBanner.svelte';
-	import AAdsBanner from '$lib/components/AAdsBanner.svelte';
-	import ExoClickSlider from '$lib/components/ExoClickSlider.svelte';
-	import ExoOutstreamAd from '$lib/components/ExoOutstreamAd.svelte';
-	import Coinpoll from '$lib/components/ownads/coinpoll.svelte';
+	import MainNav from '$lib/components/MainNav.svelte'
+	import Footer from '$lib/components/Footer.svelte'
+	import BannerAd from '$lib/components/adsterra/BannerAd.svelte'
+	import BlueBallsAd from '$lib/components/ownads/BlueBallsAd.svelte'
+	import AppInstallBanner from '$lib/components/AppInstallBanner.svelte'
+	import AAdsBanner from '$lib/components/AAdsBanner.svelte'
+	import ExoClickSlider from '$lib/components/ExoClickSlider.svelte'
+	import ExoOutstreamAd from '$lib/components/ExoOutstreamAd.svelte'
+	import Coinpoll from '$lib/components/ownads/coinpoll.svelte'
 
-	// Google Analytics ID
-	const GA_TRACKING_ID = 'G-PC7E1QDSXJ';
-
-	onMount(() => {
-		// Initialize Google Analytics
-		if (browser && GA_TRACKING_ID) {
-			window.gtag('config', GA_TRACKING_ID, {
-				page_title: document.title,
-				page_location: window.location.href
-			});
-		}
-	});
-
-	// Track page views on navigation
-	afterNavigate(() => {
-		if (browser && GA_TRACKING_ID) {
-			window.gtag('config', GA_TRACKING_ID, {
-				page_path: $page.url.pathname,
-				page_title: document.title
-			});
-		}
-	});
+	// ✅ Google Analytics removed
 </script>
 
 <svelte:head>
@@ -76,18 +55,7 @@
 		href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/android-chrome-512x512.png"
 	/>
 
-	<!-- Google Analytics -->
-	{#if GA_TRACKING_ID && browser}
-		<script async src="https://www.googletagmanager.com/gtag/js?id={GA_TRACKING_ID}"></script>
-		<script>
-			window.dataLayer = window.dataLayer || [];
-			function gtag() {
-				dataLayer.push(arguments);
-			}
-			gtag('js', new Date());
-			// Initial config will be called in onMount
-		</script>
-	{/if}
+	<!-- ✅ Google Analytics removed -->
 </svelte:head>
 
 <div class="relative flex min-h-screen flex-col bg-background text-foreground antialiased">

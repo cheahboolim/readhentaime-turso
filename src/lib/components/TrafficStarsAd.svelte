@@ -22,7 +22,7 @@
 					type: 'label-under',
 					cols: 4,
 					rows: 1,
-					title: 'nhentai.pics Ads',
+					title: 'readhentai.me Ads',
 					titlePosition: 'left',
 					adsByPosition: 'right',
 					breakpoints: [

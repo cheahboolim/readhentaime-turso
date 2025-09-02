@@ -14,9 +14,9 @@ type JoinRow<T extends string> = {
 }
 
 // Cache for random comics (reduces DB calls)
-let cachedRandomComics: any[] | null = null;
-let randomComicsCacheTime = 0;
-const RANDOM_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+let cachedRandomComics: any[] | null = null
+let randomComicsCacheTime = 0
+const RANDOM_CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
 export async function load({ params }) {
 	const slug = params.slug
@@ -32,20 +32,14 @@ export async function load({ params }) {
 	const mangaId = slugRow.manga_id
 
 	// OPTIMIZED: Fetch manga info and page count in parallel
-	const [
-		{ data: manga, error: mangaErr },
-		{ count: pageCount }
-	] = await Promise.all([
+	const [{ data: manga, error: mangaErr }, { count: pageCount }] = await Promise.all([
 		supabase
 			.from('manga')
 			.select('id, manga_id, title, feature_image_url, created_at')
 			.eq('id', mangaId)
 			.single(),
-		supabase
-			.from('pages')
-			.select('*', { count: 'exact', head: true })
-			.eq('manga_id', mangaId)
-	]);
+		supabase.from('pages').select('*', { count: 'exact', head: true }).eq('manga_id', mangaId)
+	])
 
 	if (mangaErr || !manga) throw error(404, 'Comic not found')
 
@@ -65,108 +59,78 @@ export async function load({ params }) {
 			.select('image_url')
 			.eq('manga_id', mangaId)
 			.order('page_number', { ascending: true }),
-		supabase
-			.from('manga_artists')
-			.select('artist_id(id, name, slug)')
-			.eq('manga_id', mangaId),
-		supabase
-			.from('manga_tags')
-			.select('tag_id(id, name, slug)')
-			.eq('manga_id', mangaId),
-		supabase
-			.from('manga_groups')
-			.select('group_id(id, name, slug)')
-			.eq('manga_id', mangaId),
-		supabase
-			.from('manga_categories')
-			.select('category_id(id, name, slug)')
-			.eq('manga_id', mangaId),
-		supabase
-			.from('manga_languages')
-			.select('language_id(id, name, slug)')
-			.eq('manga_id', mangaId),
-		supabase
-			.from('manga_parodies')
-			.select('parody_id(id, name, slug)')
-			.eq('manga_id', mangaId),
-		supabase
-			.from('manga_characters')
-			.select('character_id(id, name, slug)')
-			.eq('manga_id', mangaId)
-	]);
+		supabase.from('manga_artists').select('artist_id(id, name, slug)').eq('manga_id', mangaId),
+		supabase.from('manga_tags').select('tag_id(id, name, slug)').eq('manga_id', mangaId),
+		supabase.from('manga_groups').select('group_id(id, name, slug)').eq('manga_id', mangaId),
+		supabase.from('manga_categories').select('category_id(id, name, slug)').eq('manga_id', mangaId),
+		supabase.from('manga_languages').select('language_id(id, name, slug)').eq('manga_id', mangaId),
+		supabase.from('manga_parodies').select('parody_id(id, name, slug)').eq('manga_id', mangaId),
+		supabase.from('manga_characters').select('character_id(id, name, slug)').eq('manga_id', mangaId)
+	])
 
 	// Process related data
-	const artists = (artistsData || [])
-		.map(row => row.artist_id)
-		.filter(Boolean) as RelatedMeta[];
-		
-	const tags = (tagsData || [])
-		.map(row => row.tag_id)
-		.filter(Boolean) as RelatedMeta[];
-		
-	const groups = (groupsData || [])
-		.map(row => row.group_id)
-		.filter(Boolean) as RelatedMeta[];
-		
+	const artists = (artistsData || []).map((row) => row.artist_id).filter(Boolean) as RelatedMeta[]
+
+	const tags = (tagsData || []).map((row) => row.tag_id).filter(Boolean) as RelatedMeta[]
+
+	const groups = (groupsData || []).map((row) => row.group_id).filter(Boolean) as RelatedMeta[]
+
 	const categories = (categoriesData || [])
-		.map(row => row.category_id)
-		.filter(Boolean) as RelatedMeta[];
-		
+		.map((row) => row.category_id)
+		.filter(Boolean) as RelatedMeta[]
+
 	const languages = (languagesData || [])
-		.map(row => row.language_id)
-		.filter(Boolean) as RelatedMeta[];
-		
-	const parodies = (parodiesData || [])
-		.map(row => row.parody_id)
-		.filter(Boolean) as RelatedMeta[];
-		
+		.map((row) => row.language_id)
+		.filter(Boolean) as RelatedMeta[]
+
+	const parodies = (parodiesData || []).map((row) => row.parody_id).filter(Boolean) as RelatedMeta[]
+
 	const characters = (charactersData || [])
-		.map(row => row.character_id)
-		.filter(Boolean) as RelatedMeta[];
+		.map((row) => row.character_id)
+		.filter(Boolean) as RelatedMeta[]
 
 	// OPTIMIZED: Cache random comics to reduce DB load
-	let randomComics = [];
-	const now = Date.now();
-	
-	if (!cachedRandomComics || (now - randomComicsCacheTime) > RANDOM_CACHE_DURATION) {
-		const RANDOM_LIMIT = 8;
-		const randomSeed = Math.floor(Math.random() * 1000000);
+	let randomComics = []
+	const now = Date.now()
+
+	if (!cachedRandomComics || now - randomComicsCacheTime > RANDOM_CACHE_DURATION) {
+		const RANDOM_LIMIT = 8
+		const randomSeed = Math.floor(Math.random() * 1000000)
 
 		// Try RPC first, fallback if needed
-		const { data: randomManga, error: randomError } = await supabase
-			.rpc('get_random_manga', {
-				seed_value: randomSeed / 1000000,
-				limit_count: RANDOM_LIMIT,
-				offset_count: 0
-			});
+		const { data: randomManga, error: randomError } = await supabase.rpc('get_random_manga', {
+			seed_value: randomSeed / 1000000,
+			limit_count: RANDOM_LIMIT,
+			offset_count: 0
+		})
 
-		let finalRandomManga = [];
+		let finalRandomManga = []
 
 		if (randomError || !randomManga) {
 			// Fallback: get random manga
 			const { data: fallback } = await supabase
 				.from('manga')
 				.select('id, title, feature_image_url')
-				.limit(RANDOM_LIMIT * 2);
+				.limit(RANDOM_LIMIT * 2)
 
 			if (fallback) {
 				finalRandomManga = fallback
-					.map(item => ({ ...item, sort: Math.random() }))
+					.map((item) => ({ ...item, sort: Math.random() }))
 					.sort((a, b) => a.sort - b.sort)
 					.slice(0, RANDOM_LIMIT)
-					.map(({ sort, ...item }) => item);
+					.map(({ sort, ...item }) => item)
 			}
 		} else {
-			finalRandomManga = randomManga;
+			finalRandomManga = randomManga
 		}
 
 		// Get slugs for random manga
 		if (finalRandomManga.length > 0) {
-			const randomMangaIds = finalRandomManga.map((m: any) => m.id);
+			const randomMangaIds = finalRandomManga.map((m: any) => m.id)
 			const { data: randomSlugs } = await supabase
 				.from('slug_map')
 				.select('slug, manga_id')
-				.in('manga_id', randomMangaIds);
+				.in('manga_id', randomMangaIds)
 
 			if (randomSlugs) {
 				cachedRandomComics = finalRandomManga.map((item: any) => ({
@@ -175,70 +139,78 @@ export async function load({ params }) {
 					slug: randomSlugs.find((s) => s.manga_id === item.id)?.slug ?? '',
 					featureImage: item.feature_image_url,
 					author: { name: 'Unknown' }
-				}));
+				}))
 			}
 		}
 
-		randomComicsCacheTime = now;
+		randomComicsCacheTime = now
 	}
 
-	randomComics = cachedRandomComics || [];
+	randomComics = cachedRandomComics || []
 
 	// Enhanced SEO data generation
-	const topCharacters = characters.slice(0, 2).map(c => c.name);
-	const topTags = tags.slice(0, 3).map(t => t.name);
-	const topParody = parodies.length > 0 ? parodies[0].name : '';
-	const primaryArtist = artists.length > 0 ? artists[0].name : '';
-	const totalPages = pageCount || pages?.length || 0;
+	const topCharacters = characters.slice(0, 2).map((c) => c.name)
+	const topTags = tags.slice(0, 3).map((t) => t.name)
+	const topParody = parodies.length > 0 ? parodies[0].name : ''
+	const primaryArtist = artists.length > 0 ? artists[0].name : ''
+	const totalPages = pageCount || pages?.length || 0
 
 	// Generate rich SEO descriptions
 	const generateSEODescription = () => {
-		let desc = `📖 Read ${manga.title} hentai manga online free! `;
+		let desc = `📖 Read ${manga.title} hentai manga online free! `
 		if (topCharacters.length > 0) {
-			desc += `Featuring ${topCharacters.join(' and ')} characters`;
-			if (topParody) desc += ` from ${topParody}`;
-			desc += '. ';
+			desc += `Featuring ${topCharacters.join(' and ')} characters`
+			if (topParody) desc += ` from ${topParody}`
+			desc += '. '
 		}
-		if (totalPages > 0) desc += `${totalPages} high-quality pages. `;
-		if (topTags.length > 0) desc += `Tags: ${topTags.slice(0, 2).join(', ')}. `;
-		desc += 'No signup required, mobile-friendly reader! 🔞';
-		return desc;
-	};
+		if (totalPages > 0) desc += `${totalPages} high-quality pages. `
+		if (topTags.length > 0) desc += `Tags: ${topTags.slice(0, 2).join(', ')}. `
+		desc += 'No signup required, mobile-friendly reader! 🔞'
+		return desc
+	}
 
 	// Enhanced image alt text for feature image
 	const generateImageAlt = () => {
-		let alt = `${manga.title} hentai manga cover`;
-		if (topCharacters.length > 0) alt += ` featuring ${topCharacters[0]}`;
-		if (topParody) alt += ` ${topParody} parody`;
-		if (topTags.length > 0) alt += ` - ${topTags.slice(0, 2).join(' ')} adult doujinshi`;
-		if (primaryArtist) alt += ` by ${primaryArtist}`;
-		return alt;
-	};
+		let alt = `${manga.title} hentai manga cover`
+		if (topCharacters.length > 0) alt += ` featuring ${topCharacters[0]}`
+		if (topParody) alt += ` ${topParody} parody`
+		if (topTags.length > 0) alt += ` - ${topTags.slice(0, 2).join(' ')} adult doujinshi`
+		if (primaryArtist) alt += ` by ${primaryArtist}`
+		return alt
+	}
 
 	const generateImageTitle = () => {
-		let title = `Read ${manga.title} online`;
-		if (topCharacters.length > 0) title += ` - ${topCharacters[0]} adult manga`;
-		if (topTags.length > 0) title += ` - ${topTags[0]} doujinshi`;
-		title += ' - Free hentai reader';
-		return title;
-	};
+		let title = `Read ${manga.title} online`
+		if (topCharacters.length > 0) title += ` - ${topCharacters[0]} adult manga`
+		if (topTags.length > 0) title += ` - ${topTags[0]} doujinshi`
+		title += ' - Free hentai reader'
+		return title
+	}
 
 	// Social sharing optimized data
-	const socialTitle = topCharacters.length > 0 
-		? `🔞 ${manga.title} | ${topCharacters[0]}${topParody ? ` ${topParody}` : ''} Hentai | Free Read`
-		: `🔞 ${manga.title} | ${topTags.slice(0,2).join(' ')} Hentai Manga | Free Online`;
+	const socialTitle =
+		topCharacters.length > 0
+			? `🔞 ${manga.title} | ${topCharacters[0]}${topParody ? ` ${topParody}` : ''} Hentai | Free Read`
+			: `🔞 ${manga.title} | ${topTags.slice(0, 2).join(' ')} Hentai Manga | Free Online`
 
-	const socialDescription = generateSEODescription().replace(/📖|🔞/g, '').trim();
+	const socialDescription = generateSEODescription().replace(/📖|🔞/g, '').trim()
 
 	// Keywords for meta tags
 	const keywords = [
 		manga.title.toLowerCase(),
-		...topCharacters.map(c => c.toLowerCase()),
-		...topTags.map(t => t.toLowerCase()),
+		...topCharacters.map((c) => c.toLowerCase()),
+		...topTags.map((t) => t.toLowerCase()),
 		topParody.toLowerCase(),
 		primaryArtist.toLowerCase(),
-		'hentai', 'manga', 'doujinshi', 'adult manga', 'free online', 'read free'
-	].filter(Boolean).join(', ');
+		'hentai',
+		'manga',
+		'doujinshi',
+		'adult manga',
+		'free online',
+		'read free'
+	]
+		.filter(Boolean)
+		.join(', ')
 
 	return {
 		slug,
@@ -276,14 +248,14 @@ export async function load({ params }) {
 		seo: {
 			title: `${manga.title}${topCharacters.length > 0 ? ` - ${topCharacters[0]}` : ''}${topParody ? ` ${topParody} Parody` : ''} | Free Hentai Manga`,
 			description: generateSEODescription(),
-			canonical: `https://nhentai.pics/hentai/${slug}`,
+			canonical: `https://readhentai.me/hentai/${slug}`,
 			keywords,
 			// Enhanced Open Graph
 			ogTitle: socialTitle,
 			ogDescription: socialDescription,
 			ogImage: manga.feature_image_url,
 			ogType: 'article',
-			ogSiteName: 'NHentai Pics - Free Adult Manga',
+			ogSiteName: 'Read Hentai Pics - Free Adult Manga',
 			ogLocale: 'en_US',
 			// Article specific OG tags
 			articleAuthor: primaryArtist,
@@ -295,14 +267,14 @@ export async function load({ params }) {
 			twitterTitle: socialTitle,
 			twitterDescription: socialDescription,
 			twitterImage: manga.feature_image_url,
-			twitterSite: '@nhentaipics',
+			twitterSite: '@Read Hentaipics',
 			// Enhanced structured data
 			structuredData: {
 				'@context': 'https://schema.org',
 				'@type': 'Book',
 				name: manga.title,
 				description: socialDescription,
-				url: `https://nhentai.pics/hentai/${slug}`,
+				url: `https://readhentai.me/hentai/${slug}`,
 				image: manga.feature_image_url,
 				datePublished: manga.created_at,
 				numberOfPages: totalPages,
@@ -315,8 +287,8 @@ export async function load({ params }) {
 				},
 				publisher: {
 					'@type': 'Organization',
-					name: 'NHentai Pics',
-					url: 'https://nhentai.pics'
+					name: 'Read Hentai Pics',
+					url: 'https://readhentai.me'
 				},
 				offers: {
 					'@type': 'Offer',

@@ -1,30 +1,30 @@
 <!--src\routes\comic\[slug]\+page.svelte-->
 
 <script lang="ts">
-	import ComicPreview from '$lib/components/ComicPreview.svelte';
-	import SimilarManga from '$lib/components/SimilarManga.svelte';
-	import MetaGroup from '$lib/components/MetaGroup.svelte';
-	import RandomPost from '$lib/components/RandomPost.svelte';
-	import TrafficStarsAd from '$lib/components/TrafficStarsAd.svelte';
-	import ImageErrorRefreshButton from '$lib/components/ImageErrorRefreshButton.svelte';
-	import { goto } from '$app/navigation';
+	import ComicPreview from '$lib/components/ComicPreview.svelte'
+	import SimilarManga from '$lib/components/SimilarManga.svelte'
+	import MetaGroup from '$lib/components/MetaGroup.svelte'
+	import RandomPost from '$lib/components/RandomPost.svelte'
+	import TrafficStarsAd from '$lib/components/TrafficStarsAd.svelte'
+	import ImageErrorRefreshButton from '$lib/components/ImageErrorRefreshButton.svelte'
+	import { goto } from '$app/navigation'
 	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte'
 	import AAdsBanner from '$lib/components/AAdsBanner.svelte'
 	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
 
-	export let data;
-	const { slug, comic } = data;
+	export let data
+	const { slug, comic } = data
 
-	let featureImageError = false;
+	let featureImageError = false
 
 	function refreshFeatureImage() {
-		goto(`/comic/${slug}`, { invalidateAll: true });
+		goto(`/comic/${slug}`, { invalidateAll: true })
 	}
 </script>
 
 <svelte:head>
-	<title>{comic.title} | NHentai | Read Hentai Free</title>
-	<meta name="description" content={`Read ${comic.title} on NHentai.`} />
+	<title>{comic.title} | Read Hentai | Read Hentai Free</title>
+	<meta name="description" content={`Read ${comic.title} on Read Hentai.`} />
 	{#if comic.feature_image_url}
 		<meta property="og:image" content={comic.feature_image_url} />
 	{/if}
@@ -55,7 +55,7 @@
 			<div class="lg:sticky lg:top-8 space-y-6">
 				<div>
 					<h1 class="text-3xl lg:text-4xl font-bold mb-4">{comic.title}</h1>
-					
+
 					{#if comic.artists.length}
 						<div class="text-muted-foreground text-sm mb-4 flex items-center gap-2 flex-wrap">
 							<span class="font-semibold">Artists:</span>
@@ -99,8 +99,8 @@
 		{/if}
 	</div>
 
-	<SimilarManga tagIds={comic.tags.map(tag => Number(tag.id))} currentMangaId={comic.id} />
+	<SimilarManga tagIds={comic.tags.map((tag) => Number(tag.id))} currentMangaId={comic.id} />
 	<AAdsBanner />
 	<RandomPost comics={data.randomComics} />
-	<NativeAds	/>
+	<NativeAds />
 </main>

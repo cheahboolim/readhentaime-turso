@@ -17,8 +17,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 			page: 1,
 			totalPages: 1,
 			meta: {
-				title: 'Search | NHentai',
-				description: 'Search for manga on NHentai.',
+				title: 'Search | Read Hentai',
+				description: 'Search for manga on Read Hentai.',
 				prev: null,
 				next: null
 			}
@@ -49,9 +49,9 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const meta = {
 		title:
 			page > 1
-				? `Search results for "${query}" – Page ${page} | nHentai.pics`
-				: `Search results for "${query}" | nHentai.pics`,
-		description: `Discover Hentai results for "${query}" on nHentai. Page ${page} of ${totalPages}.`,
+				? `Search results for "${query}" – Page ${page} | readhentai.me`
+				: `Search results for "${query}" | readhentai.me`,
+		description: `Discover Hentai results for "${query}" on Read Hentai. Page ${page} of ${totalPages}.`,
 		prev: page > 1 ? `/search?q=${encodeURIComponent(query)}&page=${page - 1}` : null,
 		next: page < totalPages ? `/search?q=${encodeURIComponent(query)}&page=${page + 1}` : null
 	};

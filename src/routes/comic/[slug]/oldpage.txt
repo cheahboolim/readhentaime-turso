@@ -21,8 +21,8 @@
 </script>
 
 <svelte:head>
-	<title>{comic.title} | NHentai | Read Hentai Free</title>
-	<meta name="description" content={`Read ${comic.title} on NHentai.`} />
+	<title>{comic.title} | Read Hentai | Read Hentai Free</title>
+	<meta name="description" content={`Read ${comic.title} on Read Hentai.`} />
 	{#if comic.feature_image_url}
 		<meta property="og:image" content={comic.feature_image_url} />
 	{/if}

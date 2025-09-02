@@ -1,7 +1,7 @@
 {
-  "name": "NhentaiPics",
-  "short_name": "NhentaiPics",
-  "description": "Nhentai.Pic - NHentai Pictures, Manga and Doujinshi Search Engine, Free and Safe.",
+  "name": "Read HentaiPics",
+  "short_name": "Read HentaiPics",
+  "description": "Read Hentai.Pic - Read Hentai Pictures, Manga and Doujinshi Search Engine, Free and Safe.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d1117",

@@ -5,7 +5,7 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	server: {
 		host: true,
-		allowedHosts: ['s.nhentai.pics']
+		allowedHosts: ['s.readhentai.me']
 	},
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']

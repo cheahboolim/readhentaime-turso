@@ -5,9 +5,9 @@
 </script>
 
 <svelte:head>
-	<title>Characters – Browse by Name | NHentai</title>
-	<meta name="description" content="Browse all characters featured in NHentai. Organized alphabetically for easier discovery." />
-	<link rel="canonical" href="`https://nhentai.pics/p/characters" />
+	<title>Characters – Browse by Name | Read Hentai</title>
+	<meta name="description" content="Browse all characters featured in Read Hentai. Organized alphabetically for easier discovery." />
+	<link rel="canonical" href="`https://readhentai.me/p/characters" />
 </svelte:head>
 
 <div class="px-4 sm:px-6 lg:px-8 py-8 max-w-6xl mx-auto text-white">

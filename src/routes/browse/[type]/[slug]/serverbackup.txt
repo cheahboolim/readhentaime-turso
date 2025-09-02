@@ -144,10 +144,10 @@ export const load: PageServerLoad = async ({ params, url }) => {
 
 	// Enhanced SEO data
 	const typeLabel = typeLabels[type] || type;
-	const currentUrl = `https://nhentai.pics${url.pathname}${url.search}`;
+	const currentUrl = `https://readhentai.me${url.pathname}${url.search}`;
 	const canonicalUrl = page === 1 ? 
-		`https://nhentai.pics/browse/${type}/${slug}` : 
-		`https://nhentai.pics/browse/${type}/${slug}?page=${page}`;
+		`https://readhentai.me/browse/${type}/${slug}` : 
+		`https://readhentai.me/browse/${type}/${slug}?page=${page}`;
 
 	// Get popular characters/tags for this category for enhanced descriptions
 	const topCharacters = comics.map(c => c.seoData.characters).flat().filter(Boolean);
@@ -182,7 +182,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 
 	// Enhanced social sharing data
 	const socialTitle = page === 1 ? 
-		`🔥 ${totalManga} ${meta.name} Hentai Manga | Free Online | NHentai` :
+		`🔥 ${totalManga} ${meta.name} Hentai Manga | Free Online | Read Hentai` :
 		`${meta.name} Hentai - Page ${page} | ${totalManga} Free Adult Manga`;
 
 	const socialDescription = generateDescription().replace(/🔞|🎨|📚|💕|📖|🌍|👥/g, '').trim();
@@ -212,7 +212,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		},
 		seo: {
 			title: page === 1 ? 
-				`${meta.name} ${typeLabel} Hentai - ${totalManga} Free Adult Manga | NHentai` :
+				`${meta.name} ${typeLabel} Hentai - ${totalManga} Free Adult Manga | Read Hentai` :
 				`${meta.name} ${typeLabel} - Page ${page} | ${totalManga} Free Hentai Manga`,
 			description: generateDescription(),
 			canonical: canonicalUrl,
@@ -222,13 +222,13 @@ export const load: PageServerLoad = async ({ params, url }) => {
 			ogDescription: socialDescription,
 			ogImages: ogImages,
 			ogType: 'website',
-			ogSiteName: 'NHentai Pics - Free Adult Manga',
+			ogSiteName: 'Read Hentai Pics - Free Adult Manga',
 			ogLocale: 'en_US',
 			// Twitter Card enhancements
 			twitterTitle: socialTitle,
 			twitterDescription: socialDescription,
 			twitterCard: 'summary_large_image',
-			twitterSite: '@nhentaipics',
+			twitterSite: '@Read Hentaipics',
 			// Additional metadata
 			structuredData: {
 				'@context': 'https://schema.org',
@@ -250,9 +250,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
 						position: (page - 1) * PAGE_SIZE + index + 1,
 						item: {
 							'@type': 'Book',
-							'@id': `https://nhentai.pics/hentai/${comic.slug}`,
+							'@id': `https://readhentai.me/hentai/${comic.slug}`,
 							name: comic.title,
-							url: `https://nhentai.pics/hentai/${comic.slug}`,
+							url: `https://readhentai.me/hentai/${comic.slug}`,
 							image: comic.featureImage,
 							author: {
 								'@type': 'Person',
@@ -271,19 +271,19 @@ export const load: PageServerLoad = async ({ params, url }) => {
 							'@type': 'ListItem',
 							position: 1,
 							name: 'Home',
-							item: 'https://nhentai.pics'
+							item: 'https://readhentai.me'
 						},
 						{
 							'@type': 'ListItem',
 							position: 2,
 							name: 'Browse',
-							item: 'https://nhentai.pics/browse'
+							item: 'https://readhentai.me/browse'
 						},
 						{
 							'@type': 'ListItem',
 							position: 3,
 							name: typeLabel + 's',
-							item: `https://nhentai.pics/p/${type}`
+							item: `https://readhentai.me/p/${type}`
 						},
 						{
 							'@type': 'ListItem',

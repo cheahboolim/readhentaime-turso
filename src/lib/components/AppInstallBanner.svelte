@@ -1,85 +1,88 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { trackEvent } from '$lib/gtm';
+	import { onMount } from 'svelte'
+	import { trackEvent } from '$lib/gtm'
 
-	let os = 'your device';
-	let deferredPrompt: Event | null = null;
-	let canInstall = false;
-	let showBanner = true;
-	let isAlreadyInstalled = false;
+	let os = 'your device'
+	let deferredPrompt: Event | null = null
+	let canInstall = false
+	let showBanner = true
+	let isAlreadyInstalled = false
 
 	// Detect user OS
 	function detectOS(): string {
-		const ua = navigator.userAgent || navigator.vendor;
-		if (/android/i.test(ua)) return 'Android';
-		if (/iPad|iPhone|iPod/.test(ua)) return 'iOS';
-		if (/Windows/.test(ua)) return 'Windows';
-		if (/Mac/.test(ua)) return 'Mac';
-		return 'your device';
+		const ua = navigator.userAgent || navigator.vendor
+		if (/android/i.test(ua)) return 'Android'
+		if (/iPad|iPhone|iPod/.test(ua)) return 'iOS'
+		if (/Windows/.test(ua)) return 'Windows'
+		if (/Mac/.test(ua)) return 'Mac'
+		return 'your device'
 	}
 
 	// Check if PWA is already installed
 	function checkIfInstalled(): boolean {
 		// Check if already installed via localStorage
-		if (typeof localStorage !== 'undefined' && localStorage.getItem('NHentai_installed') === '1') {
-			return true;
+		if (
+			typeof localStorage !== 'undefined' &&
+			localStorage.getItem('Read Hentai_installed') === '1'
+		) {
+			return true
 		}
-		
+
 		// Check if running in standalone mode (PWA is installed)
 		if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-			return true;
+			return true
 		}
-		
+
 		// Check for iOS PWA
-		if (('standalone' in window.navigator) && (window.navigator as any).standalone) {
-			return true;
+		if ('standalone' in window.navigator && (window.navigator as any).standalone) {
+			return true
 		}
-		
-		return false;
+
+		return false
 	}
 
 	// Check if user has dismissed banner recently
 	function checkIfDismissed(): boolean {
-		if (typeof localStorage === 'undefined') return false;
-		const dismissedAt = localStorage.getItem('NHentai_banner_dismissed');
-		if (!dismissedAt) return false;
-		
+		if (typeof localStorage === 'undefined') return false
+		const dismissedAt = localStorage.getItem('Read Hentai_banner_dismissed')
+		if (!dismissedAt) return false
+
 		// Show again after 7 days
-		const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-		return parseInt(dismissedAt) > sevenDaysAgo;
+		const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+		return parseInt(dismissedAt) > sevenDaysAgo
 	}
 
 	onMount(() => {
-		os = detectOS();
-		isAlreadyInstalled = checkIfInstalled();
-		
+		os = detectOS()
+		isAlreadyInstalled = checkIfInstalled()
+
 		// Don't show banner if already installed or recently dismissed
 		if (isAlreadyInstalled || checkIfDismissed()) {
-			showBanner = false;
-			return;
+			showBanner = false
+			return
 		}
 
 		// Prepare install prompt if supported
 		window.addEventListener('beforeinstallprompt', (e) => {
-			console.log('[PWA] beforeinstallprompt triggered');
-			e.preventDefault();
-			deferredPrompt = e;
-			canInstall = true;
-		});
+			console.log('[PWA] beforeinstallprompt triggered')
+			e.preventDefault()
+			deferredPrompt = e
+			canInstall = true
+		})
 
 		// Track install event
 		window.addEventListener('appinstalled', () => {
-			console.log('[PWA] appinstalled fired');
+			console.log('[PWA] appinstalled fired')
 			if (typeof localStorage !== 'undefined') {
-				localStorage.setItem('NHentai_installed', '1');
+				localStorage.setItem('Read Hentai_installed', '1')
 			}
 			trackEvent('pwa_installed', {
 				category: 'PWA',
 				label: 'App Installed'
-			});
-			showBanner = false;
-		});
-	});
+			})
+			showBanner = false
+		})
+	})
 
 	// Trigger install prompt
 	async function promptInstall() {
@@ -87,50 +90,50 @@
 			trackEvent('pwa_install_prompt_clicked', {
 				category: 'PWA',
 				label: 'Install Button Clicked'
-			});
-			
-			(deferredPrompt as any).prompt();
-			const result = await (deferredPrompt as any).userChoice;
-			console.log('[PWA] userChoice:', result);
-			
+			})
+
+			;(deferredPrompt as any).prompt()
+			const result = await (deferredPrompt as any).userChoice
+			console.log('[PWA] userChoice:', result)
+
 			if (result.outcome === 'accepted') {
 				trackEvent('pwa_install_accepted', {
 					category: 'PWA',
 					label: 'Install Accepted'
-				});
+				})
 			} else {
 				trackEvent('pwa_install_dismissed', {
 					category: 'PWA',
 					label: 'Install Dismissed'
-				});
+				})
 			}
-			
-			deferredPrompt = null;
-			canInstall = false;
+
+			deferredPrompt = null
+			canInstall = false
 		}
 	}
 
 	// Handle banner dismissal
 	function dismissBanner() {
 		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('NHentai_banner_dismissed', Date.now().toString());
+			localStorage.setItem('Read Hentai_banner_dismissed', Date.now().toString())
 		}
 		trackEvent('pwa_banner_dismissed', {
 			category: 'PWA',
 			label: 'Banner Dismissed'
-		});
-		showBanner = false;
+		})
+		showBanner = false
 	}
 
 	// Get OS-specific instructions
 	function getInstallInstructions(os: string): string {
 		switch (os) {
 			case 'iOS':
-				return 'Tap Share → "Add to Home Screen"';
+				return 'Tap Share → "Add to Home Screen"'
 			case 'Android':
-				return 'Tap Menu → "Add to Home Screen"';
+				return 'Tap Menu → "Add to Home Screen"'
 			default:
-				return 'Add to home screen from your browser menu';
+				return 'Add to home screen from your browser menu'
 		}
 	}
 </script>
@@ -138,12 +141,10 @@
 {#if showBanner && !isAlreadyInstalled}
 	<!-- Always visible banner -->
 	<div class="app-banner">
-		<button class="dismiss-btn" on:click={dismissBanner} aria-label="Dismiss banner">
-			✕
-		</button>
-		
+		<button class="dismiss-btn" on:click={dismissBanner} aria-label="Dismiss banner"> ✕ </button>
+
 		<div class="content">
-			<h2 class="title">❤️ Love nHentai? Get our app!</h2>
+			<h2 class="title">❤️ Love Read Hentai? Get our app!</h2>
 			<p class="subtitle">Download app for {os}</p>
 
 			{#if canInstall}
@@ -154,11 +155,7 @@
 				<p class="instructions">{getInstallInstructions(os)}</p>
 			{/if}
 
-			<p class="note">
-				🔒 100% safe and verified • 
-				⚡ Faster loading • 
-				🔔 Push notifications
-			</p>
+			<p class="note">🔒 100% safe and verified • ⚡ Faster loading • 🔔 Push notifications</p>
 		</div>
 	</div>
 {/if}
@@ -243,7 +240,7 @@
 		border: none;
 		cursor: pointer;
 	}
-	
+
 	.install-btn:hover {
 		opacity: 0.9;
 		transform: translateY(-1px);

@@ -2,9 +2,9 @@
 	import AAdsBanner from '$lib/components/AAdsBanner.svelte'
 	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte'
 	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
-	import RandomHome from '$lib/components/RandomHome.svelte';
-	import TrafficStarsAd from '$lib/components/TrafficStarsAd.svelte';
-	export let data;
+	import RandomHome from '$lib/components/RandomHome.svelte'
+	import TrafficStarsAd from '$lib/components/TrafficStarsAd.svelte'
+	export let data
 </script>
 
 <svelte:head>
@@ -18,21 +18,27 @@
 	{/if}
 	<!-- Homepage should be indexed -->
 	<meta name="robots" content="index, follow" />
-	
+
 	<!-- Open Graph tags for social sharing -->
 	<meta property="og:title" content={data.meta.title} />
 	<meta property="og:description" content={data.meta.description} />
 	<meta property="og:type" content="website" />
-	<meta property="og:image" content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/NHentai-home.jpg" />
+	<meta
+		property="og:image"
+		content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/Read Hentai-home.jpg"
+	/>
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
 	<meta property="og:image:type" content="image/jpeg" />
-	<meta property="og:url" content="https://nhentai.pics" />
-	<meta property="og:site_name" content="nHentai" />
-	
+	<meta property="og:url" content="https://readhentai.me" />
+	<meta property="og:site_name" content="Read Hentai" />
+
 	<!-- Twitter Card -->
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:image" content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/NHentai-home.jpg" />
+	<meta
+		name="twitter:image"
+		content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/Read Hentai-home.jpg"
+	/>
 	<meta name="twitter:title" content={data.meta.title} />
 	<meta name="twitter:description" content={data.meta.description} />
 </svelte:head>

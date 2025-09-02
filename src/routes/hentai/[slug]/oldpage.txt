@@ -100,7 +100,7 @@
 	
 	<!-- Additional SEO -->
 	<meta name="robots" content="index, follow, max-image-preview:large" />
-	<meta name="author" content={comic.seoData.primaryArtist || 'NHentai Pics'} />
+	<meta name="author" content={comic.seoData.primaryArtist || 'Read Hentai Pics'} />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	
 	<!-- Structured Data -->

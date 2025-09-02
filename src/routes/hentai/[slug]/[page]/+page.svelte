@@ -1,598 +1,610 @@
 <!-- src/routes/hentai/[slug]/[page]/+page.svelte - FIXED VERSION -->
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
-  import { seo } from '$lib/seo.ts';
-  import SimilarManga from '$lib/components/SimilarManga.svelte';
-  import RandomPost from '$lib/components/RandomPost.svelte';
-  import TrafficStarsAd from '$lib/components/TrafficStarsAd.svelte';
-	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte';
-  import NativeAds from '$lib/components/adsterra/NativeAds.svelte';
+	import { page } from '$app/stores'
+	import { goto } from '$app/navigation'
+	import { onMount } from 'svelte'
+	import { seo } from '$lib/seo.ts'
+	import SimilarManga from '$lib/components/SimilarManga.svelte'
+	import RandomPost from '$lib/components/RandomPost.svelte'
+	import TrafficStarsAd from '$lib/components/TrafficStarsAd.svelte'
+	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte'
+	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
 	import AAdsBanner from '$lib/components/AAdsBanner.svelte'
 
-  export let data: {
-    slug: string;
-    manga: { 
-      id: string; 
-      title: string; 
-      tagIds: number[]; 
-      tagNames: string[];
-      characterNames: string[];
-      parodyNames: string[];
-      artistNames: string[];
-      seoData: {
-        topCharacters: string[];
-        topTags: string[];
-        topParody: string;
-        primaryArtist: string;
-      };
-    };
-    images: Array<{
-      url: string;
-      alt: string;
-      title: string;
-      pageNumber: number;
-    }>;
-    currentPage: number;
-    totalPages: number;
-    randomComics: any[];
-    seo: {
-      title: string;
-      description: string;
-      canonical: string;
-      prev?: string;
-      next?: string;
-      keywords: string;
-      ogTitle: string;
-      ogDescription: string;
-      ogImage: string;
-      ogType: string;
-      ogSiteName: string;
-      ogLocale: string;
-      articleAuthor: string;
-      articlePublishedTime: string;
-      articleSection: string;
-      articleTags: string[];
-      twitterCard: string;
-      twitterTitle: string;
-      twitterDescription: string;
-      twitterImage: string;
-      twitterSite: string;
-      jsonLd: any;
-    };
-  };
+	export let data: {
+		slug: string
+		manga: {
+			id: string
+			title: string
+			tagIds: number[]
+			tagNames: string[]
+			characterNames: string[]
+			parodyNames: string[]
+			artistNames: string[]
+			seoData: {
+				topCharacters: string[]
+				topTags: string[]
+				topParody: string
+				primaryArtist: string
+			}
+		}
+		images: Array<{
+			url: string
+			alt: string
+			title: string
+			pageNumber: number
+		}>
+		currentPage: number
+		totalPages: number
+		randomComics: any[]
+		seo: {
+			title: string
+			description: string
+			canonical: string
+			prev?: string
+			next?: string
+			keywords: string
+			ogTitle: string
+			ogDescription: string
+			ogImage: string
+			ogType: string
+			ogSiteName: string
+			ogLocale: string
+			articleAuthor: string
+			articlePublishedTime: string
+			articleSection: string
+			articleTags: string[]
+			twitterCard: string
+			twitterTitle: string
+			twitterDescription: string
+			twitterImage: string
+			twitterSite: string
+			jsonLd: any
+		}
+	}
 
-  const { slug, manga, totalPages } = data;
-  const IMAGES_PER_PAGE = data.images.length;
+	const { slug, manga, totalPages } = data
+	const IMAGES_PER_PAGE = data.images.length
 
-  // Track current page from URL params
-  let currentPage = data.currentPage;
-  let showShareOptions = false;
-  
-  $: {
-    const urlPage = Number($page.params.page);
-    if (!isNaN(urlPage) && urlPage !== currentPage) {
-      currentPage = urlPage;
-      trackPageView();
-    }
-  }
+	// Track current page from URL params
+	let currentPage = data.currentPage
+	let showShareOptions = false
 
-  // Preload adjacent images for faster navigation
-  let preloadedImages = new Set<string>();
+	$: {
+		const urlPage = Number($page.params.page)
+		if (!isNaN(urlPage) && urlPage !== currentPage) {
+			currentPage = urlPage
+			trackPageView()
+		}
+	}
 
-  function preloadImage(url: string) {
-    if (!preloadedImages.has(url)) {
-      const img = new Image();
-      img.src = url;
-      preloadedImages.add(url);
-    }
-  }
+	// Preload adjacent images for faster navigation
+	let preloadedImages = new Set<string>()
 
-  // GA4 Tracking Function
-  function trackPageView() {
-    if (typeof gtag !== 'undefined') {
-      gtag('event', 'comic_page_view', {
-        'event_category': 'engagement',
-        'event_label': slug,
-        'comic_slug': slug,
-        'comic_title': manga.title,
-        'page_number': currentPage,
-        'total_pages': totalPages,
-        'characters': manga.seoData.topCharacters.join(','),
-        'tags': manga.seoData.topTags.join(','),
-        'currency': 'USD',
-        'value': 0.001,
-        'custom_parameter_1': 'comic_engagement'
-      });
+	function preloadImage(url: string) {
+		if (!preloadedImages.has(url)) {
+			const img = new Image()
+			img.src = url
+			preloadedImages.add(url)
+		}
+	}
 
-      gtag('event', 'conversion', {
-        'send_to': 'G-PC7E1QDSXJ',
-        'currency': 'USD',
-        'value': 0.001,
-        'comic_title': manga.title,
-        'comic_slug': slug,
-        'page_number': currentPage
-      });
+	// GA4 Tracking Function
+	function trackPageView() {
+		if (typeof gtag !== 'undefined') {
+			gtag('event', 'comic_page_view', {
+				event_category: 'engagement',
+				event_label: slug,
+				comic_slug: slug,
+				comic_title: manga.title,
+				page_number: currentPage,
+				total_pages: totalPages,
+				characters: manga.seoData.topCharacters.join(','),
+				tags: manga.seoData.topTags.join(','),
+				currency: 'USD',
+				value: 0.001,
+				custom_parameter_1: 'comic_engagement'
+			})
 
-      gtag('event', 'view_item', {
-        'currency': 'USD',
-        'value': 0.001,
-        'items': [{
-          'item_id': `${slug}_page_${currentPage}`,
-          'item_name': `${manga.title} - Page ${currentPage}`,
-          'item_category': 'comic',
-          'item_brand': 'NHentai',
-          'item_variant': `page_${currentPage}`,
-          'quantity': 1,
-          'price': 0.001
-        }]
-      });
-    }
-  }
+			gtag('event', 'conversion', {
+				send_to: 'G-PC7E1QDSXJ',
+				currency: 'USD',
+				value: 0.001,
+				comic_title: manga.title,
+				comic_slug: slug,
+				page_number: currentPage
+			})
 
-  onMount(() => {
-    seo.set({
-      title: data.seo.title,
-      description: data.seo.description,
-      canonical: data.seo.canonical,
-      ...(data.seo.prev && { prev: data.seo.prev }),
-      ...(data.seo.next && { next: data.seo.next })
-    });
+			gtag('event', 'view_item', {
+				currency: 'USD',
+				value: 0.001,
+				items: [
+					{
+						item_id: `${slug}_page_${currentPage}`,
+						item_name: `${manga.title} - Page ${currentPage}`,
+						item_category: 'comic',
+						item_brand: 'Read Hentai',
+						item_variant: `page_${currentPage}`,
+						quantity: 1,
+						price: 0.001
+					}
+				]
+			})
+		}
+	}
 
-    trackPageView();
+	onMount(() => {
+		seo.set({
+			title: data.seo.title,
+			description: data.seo.description,
+			canonical: data.seo.canonical,
+			...(data.seo.prev && { prev: data.seo.prev }),
+			...(data.seo.next && { next: data.seo.next })
+		})
 
-    // Preload next and previous page images
-    const nextPageUrl = `/hentai/${slug}/${currentPage + 1}`;
-    const prevPageUrl = `/hentai/${slug}/${currentPage - 1}`;
-    
-    if (currentPage < totalPages) {
-      fetch(nextPageUrl).catch(() => {});
-    }
-    
-    if (currentPage > 1) {
-      fetch(prevPageUrl).catch(() => {});
-    }
+		trackPageView()
 
-    // Add keyboard navigation
-    function handleKeydown(event: KeyboardEvent) {
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        goToPage(currentPage - 1);
-      } else if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        goToPage(currentPage + 1);
-      }
-    }
+		// Preload next and previous page images
+		const nextPageUrl = `/hentai/${slug}/${currentPage + 1}`
+		const prevPageUrl = `/hentai/${slug}/${currentPage - 1}`
 
-    document.addEventListener('keydown', handleKeydown);
-    return () => document.removeEventListener('keydown', handleKeydown);
-  });
+		if (currentPage < totalPages) {
+			fetch(nextPageUrl).catch(() => {})
+		}
 
-  function goToPage(n: number) {
-    if (n >= 1 && n <= totalPages) {
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'comic_navigation', {
-          'event_category': 'engagement',
-          'event_label': 'page_navigation',
-          'comic_slug': slug,
-          'from_page': currentPage,
-          'to_page': n,
-          'navigation_type': 'manual'
-        });
-      }
-      
-      goto(`/hentai/${slug}/${n}`, {
-        replaceState: false,
-        keepFocus: true,
-        invalidateAll: true
-      });
-    }
-  }
+		if (currentPage > 1) {
+			fetch(prevPageUrl).catch(() => {})
+		}
 
-  // Click navigation handlers
-  function handleImageClick(event: MouseEvent) {
-    const target = event.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const imageWidth = rect.width;
-    
-    if (clickX < imageWidth / 3) {
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'comic_navigation', {
-          'event_category': 'engagement',
-          'event_label': 'image_click_prev',
-          'comic_slug': slug,
-          'page_number': currentPage,
-          'navigation_type': 'image_click'
-        });
-      }
-      goToPage(currentPage - 1);
-    }
-    else if (clickX > (imageWidth * 2) / 3) {
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'comic_navigation', {
-          'event_category': 'engagement',
-          'event_label': 'image_click_next',
-          'comic_slug': slug,
-          'page_number': currentPage,
-          'navigation_type': 'image_click'
-        });
-      }
-      goToPage(currentPage + 1);
-    }
-  }
+		// Add keyboard navigation
+		function handleKeydown(event: KeyboardEvent) {
+			if (event.key === 'ArrowLeft') {
+				event.preventDefault()
+				goToPage(currentPage - 1)
+			} else if (event.key === 'ArrowRight') {
+				event.preventDefault()
+				goToPage(currentPage + 1)
+			}
+		}
 
-  // Share functionality
-  function copyPageUrl() {
-    navigator.clipboard.writeText(window.location.href);
-    const button = document.querySelector('[data-copy-button]');
-    if (button) {
-      const originalText = button.textContent;
-      button.textContent = '✅ Copied!';
-      setTimeout(() => {
-        button.textContent = originalText;
-      }, 2000);
-    }
-  }
+		document.addEventListener('keydown', handleKeydown)
+		return () => document.removeEventListener('keydown', handleKeydown)
+	})
 
-  function shareToTwitter() {
-    const text = `📖 Reading ${manga.title} page ${currentPage}! ${manga.seoData.topCharacters.length > 0 ? `${manga.seoData.topCharacters[0]} ` : ''}${manga.seoData.topTags.slice(0,2).join(' ')} content!`;
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
-    window.open(url, '_blank', 'width=550,height=420');
-  }
+	function goToPage(n: number) {
+		if (n >= 1 && n <= totalPages) {
+			if (typeof gtag !== 'undefined') {
+				gtag('event', 'comic_navigation', {
+					event_category: 'engagement',
+					event_label: 'page_navigation',
+					comic_slug: slug,
+					from_page: currentPage,
+					to_page: n,
+					navigation_type: 'manual'
+				})
+			}
 
-  function shareToReddit() {
-    const title = `${manga.title} - Page ${currentPage}/${totalPages}${manga.seoData.topCharacters.length > 0 ? ` [${manga.seoData.topCharacters[0]}]` : ''}`;
-    const url = `https://reddit.com/submit?title=${encodeURIComponent(title)}&url=${encodeURIComponent(window.location.href)}`;
-    window.open(url, '_blank');
-  }
+			goto(`/hentai/${slug}/${n}`, {
+				replaceState: false,
+				keepFocus: true,
+				invalidateAll: true
+			})
+		}
+	}
 
-  // Dynamic page title for browser tab
-  let pageTitle: string;
-  $: pageTitle = currentPage === 1
-    ? `Read ${manga.title} Online Free - Chapter ${currentPage} | NHentai`
-    : `${manga.title} - Page ${currentPage} Online Reader | NHentai`;
+	// Click navigation handlers
+	function handleImageClick(event: MouseEvent) {
+		const target = event.currentTarget as HTMLElement
+		const rect = target.getBoundingClientRect()
+		const clickX = event.clientX - rect.left
+		const imageWidth = rect.width
+
+		if (clickX < imageWidth / 3) {
+			if (typeof gtag !== 'undefined') {
+				gtag('event', 'comic_navigation', {
+					event_category: 'engagement',
+					event_label: 'image_click_prev',
+					comic_slug: slug,
+					page_number: currentPage,
+					navigation_type: 'image_click'
+				})
+			}
+			goToPage(currentPage - 1)
+		} else if (clickX > (imageWidth * 2) / 3) {
+			if (typeof gtag !== 'undefined') {
+				gtag('event', 'comic_navigation', {
+					event_category: 'engagement',
+					event_label: 'image_click_next',
+					comic_slug: slug,
+					page_number: currentPage,
+					navigation_type: 'image_click'
+				})
+			}
+			goToPage(currentPage + 1)
+		}
+	}
+
+	// Share functionality
+	function copyPageUrl() {
+		navigator.clipboard.writeText(window.location.href)
+		const button = document.querySelector('[data-copy-button]')
+		if (button) {
+			const originalText = button.textContent
+			button.textContent = '✅ Copied!'
+			setTimeout(() => {
+				button.textContent = originalText
+			}, 2000)
+		}
+	}
+
+	function shareToTwitter() {
+		const text = `📖 Reading ${manga.title} page ${currentPage}! ${manga.seoData.topCharacters.length > 0 ? `${manga.seoData.topCharacters[0]} ` : ''}${manga.seoData.topTags.slice(0, 2).join(' ')} content!`
+		const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`
+		window.open(url, '_blank', 'width=550,height=420')
+	}
+
+	function shareToReddit() {
+		const title = `${manga.title} - Page ${currentPage}/${totalPages}${manga.seoData.topCharacters.length > 0 ? ` [${manga.seoData.topCharacters[0]}]` : ''}`
+		const url = `https://reddit.com/submit?title=${encodeURIComponent(title)}&url=${encodeURIComponent(window.location.href)}`
+		window.open(url, '_blank')
+	}
+
+	// Dynamic page title for browser tab
+	let pageTitle: string
+	$: pageTitle =
+		currentPage === 1
+			? `Read ${manga.title} Online Free - Chapter ${currentPage} | Read Hentai`
+			: `${manga.title} - Page ${currentPage} Online Reader | Read Hentai`
 </script>
 
 <svelte:head>
-  <title>{pageTitle}</title>
-  <meta name="description" content={data.seo.description} />
-  <meta name="keywords" content={data.seo.keywords} />
-  <link rel="canonical" href={data.seo.canonical} />
-  
-  <!-- Enhanced Open Graph -->
-  <meta property="og:type" content={data.seo.ogType} />
-  <meta property="og:site_name" content={data.seo.ogSiteName} />
-  <meta property="og:locale" content={data.seo.ogLocale} />
-  <meta property="og:url" content={data.seo.canonical} />
-  <meta property="og:title" content={data.seo.ogTitle} />
-  <meta property="og:description" content={data.seo.ogDescription} />
-  <meta property="og:image" content={data.seo.ogImage} />
-  <meta property="og:image:secure_url" content={data.seo.ogImage} />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="{manga.title} page {currentPage} - {manga.seoData.topTags.slice(0,2).join(' ')} hentai manga" />
-  
-  <!-- Article-specific OG tags -->
-  {#if data.seo.articleAuthor}
-    <meta property="article:author" content={data.seo.articleAuthor} />
-  {/if}
-  <meta property="article:published_time" content={data.seo.articlePublishedTime} />
-  <meta property="article:section" content={data.seo.articleSection} />
-  {#each data.seo.articleTags as tag}
-    <meta property="article:tag" content={tag} />
-  {/each}
-  
-  <!-- Enhanced Twitter Cards -->
-  <meta name="twitter:card" content={data.seo.twitterCard} />
-  <meta name="twitter:site" content={data.seo.twitterSite} />
-  <meta name="twitter:title" content={data.seo.twitterTitle} />
-  <meta name="twitter:description" content={data.seo.twitterDescription} />
-  <meta name="twitter:image" content={data.seo.twitterImage} />
-  <meta name="twitter:image:alt" content="{manga.title} page {currentPage} - read online free" />
-  
-  <!-- Twitter Labels for Rich Cards -->
-  <meta name="twitter:label1" content="Progress" />
-  <meta name="twitter:data1" content="{currentPage} of {totalPages} pages" />
-  {#if manga.seoData.topCharacters.length > 0}
-    <meta name="twitter:label2" content="Characters" />
-    <meta name="twitter:data2" content={manga.seoData.topCharacters.slice(0,2).join(', ')} />
-  {/if}
-  
-  <!-- Additional SEO -->
-  <meta name="robots" content="index, follow, max-image-preview:large" />
-  <meta name="author" content={manga.seoData.primaryArtist || 'NHentai Pics'} />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <!-- Pagination -->
-  {#if data.seo.prev}
-    <link rel="prev" href={data.seo.prev} />
-  {/if}
-  {#if data.seo.next}
-    <link rel="next" href={data.seo.next} />
-  {/if}
-  
-  <!-- Structured Data -->
-  <script type="application/ld+json">
+	<title>{pageTitle}</title>
+	<meta name="description" content={data.seo.description} />
+	<meta name="keywords" content={data.seo.keywords} />
+	<link rel="canonical" href={data.seo.canonical} />
+
+	<!-- Enhanced Open Graph -->
+	<meta property="og:type" content={data.seo.ogType} />
+	<meta property="og:site_name" content={data.seo.ogSiteName} />
+	<meta property="og:locale" content={data.seo.ogLocale} />
+	<meta property="og:url" content={data.seo.canonical} />
+	<meta property="og:title" content={data.seo.ogTitle} />
+	<meta property="og:description" content={data.seo.ogDescription} />
+	<meta property="og:image" content={data.seo.ogImage} />
+	<meta property="og:image:secure_url" content={data.seo.ogImage} />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta
+		property="og:image:alt"
+		content="{manga.title} page {currentPage} - {manga.seoData.topTags
+			.slice(0, 2)
+			.join(' ')} hentai manga"
+	/>
+
+	<!-- Article-specific OG tags -->
+	{#if data.seo.articleAuthor}
+		<meta property="article:author" content={data.seo.articleAuthor} />
+	{/if}
+	<meta property="article:published_time" content={data.seo.articlePublishedTime} />
+	<meta property="article:section" content={data.seo.articleSection} />
+	{#each data.seo.articleTags as tag}
+		<meta property="article:tag" content={tag} />
+	{/each}
+
+	<!-- Enhanced Twitter Cards -->
+	<meta name="twitter:card" content={data.seo.twitterCard} />
+	<meta name="twitter:site" content={data.seo.twitterSite} />
+	<meta name="twitter:title" content={data.seo.twitterTitle} />
+	<meta name="twitter:description" content={data.seo.twitterDescription} />
+	<meta name="twitter:image" content={data.seo.twitterImage} />
+	<meta name="twitter:image:alt" content="{manga.title} page {currentPage} - read online free" />
+
+	<!-- Twitter Labels for Rich Cards -->
+	<meta name="twitter:label1" content="Progress" />
+	<meta name="twitter:data1" content="{currentPage} of {totalPages} pages" />
+	{#if manga.seoData.topCharacters.length > 0}
+		<meta name="twitter:label2" content="Characters" />
+		<meta name="twitter:data2" content={manga.seoData.topCharacters.slice(0, 2).join(', ')} />
+	{/if}
+
+	<!-- Additional SEO -->
+	<meta name="robots" content="index, follow, max-image-preview:large" />
+	<meta name="author" content={manga.seoData.primaryArtist || 'Read Hentai Pics'} />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<!-- Pagination -->
+	{#if data.seo.prev}
+		<link rel="prev" href={data.seo.prev} />
+	{/if}
+	{#if data.seo.next}
+		<link rel="next" href={data.seo.next} />
+	{/if}
+
+	<!-- Structured Data -->
+	<script type="application/ld+json">
     {JSON.stringify(data.seo.jsonLd)}
-  </script>
+	</script>
 </svelte:head>
 
 <main class="container mx-auto px-4 py-8">
-  <!-- Breadcrumb for SEO -->
-  <nav class="mb-6" aria-label="Breadcrumb">
-    <ol class="flex items-center space-x-2 text-sm text-gray-300">
-      <li><a href="/" class="hover:text-white">Home</a></li>
-      <li class="text-gray-500">›</li>
-      <li><a href={`/hentai/${slug}`} class="hover:text-white">Gallery</a></li>
-      <li class="text-gray-500">›</li>
-      <li class="text-white font-medium">Read Online</li>
-    </ol>
-  </nav>
+	<!-- Breadcrumb for SEO -->
+	<nav class="mb-6" aria-label="Breadcrumb">
+		<ol class="flex items-center space-x-2 text-sm text-gray-300">
+			<li><a href="/" class="hover:text-white">Home</a></li>
+			<li class="text-gray-500">›</li>
+			<li><a href={`/hentai/${slug}`} class="hover:text-white">Gallery</a></li>
+			<li class="text-gray-500">›</li>
+			<li class="text-white font-medium">Read Online</li>
+		</ol>
+	</nav>
 
-  <!-- Top navigation -->
-  <div class="mb-6 flex flex-wrap gap-4 items-center justify-between">
-    <a
-      href={`/hentai/${slug}`}
-      class="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors"
-    >
-      ← Back to Gallery
-    </a>
-    
-    <!-- Page indicator with enhanced SEO info -->
-    <div class="text-gray-300 text-sm flex flex-col sm:flex-row items-center gap-2">
-      <span>Page {currentPage} of {totalPages}</span>
-      {#if manga.seoData.topCharacters.length > 0}
-        <span class="text-pink-400">• {manga.seoData.topCharacters[0]}</span>
-      {/if}
-      {#if manga.seoData.topParody}
-        <span class="text-blue-400">• {manga.seoData.topParody}</span>
-      {/if}
-    </div>
-  </div>
+	<!-- Top navigation -->
+	<div class="mb-6 flex flex-wrap gap-4 items-center justify-between">
+		<a
+			href={`/hentai/${slug}`}
+			class="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors"
+		>
+			← Back to Gallery
+		</a>
 
-  <!-- Enhanced title with more SEO context -->
-  <header class="mb-6 text-center">
-    <h1 class="text-3xl md:text-4xl font-bold mb-2 text-white">
-      {manga.title}
-      {#if manga.seoData.topCharacters.length > 0}
-        <span class="block text-xl text-pink-400 mt-2">
-          {manga.seoData.topCharacters.slice(0,2).join(' & ')}
-        </span>
-      {/if}
-    </h1>
-    <div class="text-gray-400 text-sm space-y-1">
-      <p>
-        Reading Page {currentPage} 
-        {#if manga.seoData.topTags.length > 0}
-          • {manga.seoData.topTags.slice(0, 3).join(', ')}
-        {/if}
-      </p>
-      {#if manga.seoData.primaryArtist}
-        <p>by <span class="text-pink-400">{manga.seoData.primaryArtist}</span></p>
-      {/if}
-    </div>
-    <p class="text-gray-500 text-xs mt-3">
-      💡 Click left/right sides of image to navigate • Use arrow keys
-    </p>
-  </header>
+		<!-- Page indicator with enhanced SEO info -->
+		<div class="text-gray-300 text-sm flex flex-col sm:flex-row items-center gap-2">
+			<span>Page {currentPage} of {totalPages}</span>
+			{#if manga.seoData.topCharacters.length > 0}
+				<span class="text-pink-400">• {manga.seoData.topCharacters[0]}</span>
+			{/if}
+			{#if manga.seoData.topParody}
+				<span class="text-blue-400">• {manga.seoData.topParody}</span>
+			{/if}
+		</div>
+	</div>
 
-  <!-- FIXED Share Section for Reading Pages -->
-  <div class="bg-gray-900 border border-gray-700 rounded-lg p-4 mb-6 max-w-2xl mx-auto">
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      <div>
-        <h3 class="font-medium text-gray-200 mb-1">
-          📖 Reading {manga.title}? Save your progress!
-        </h3>
-        <p class="text-sm text-gray-400">
-          Copy URL to bookmark this exact page
-        </p>
-      </div>
-      
-      <div class="flex items-center gap-3">
-        <button
-          data-copy-button
-          on:click={copyPageUrl}
-          class="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
-        >
-          📋 Copy Page URL
-        </button>
-        
-        <!-- FIXED: Added data-share-container attribute -->
-        <div class="relative" data-share-container>
-          <button
-            on:click={() => showShareOptions = !showShareOptions}
-            class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors text-sm font-medium"
-          >
-            🔗 Share
-          </button>
-          
-          {#if showShareOptions}
-            <div class="absolute right-0 top-full mt-2 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-10 min-w-[150px]">
-              <button
-                on:click={shareToTwitter}
-                class="w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors text-sm flex items-center gap-2 text-gray-300"
-              >
-                🐦 Twitter
-              </button>
-              <button
-                on:click={shareToReddit}
-                class="w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors text-sm flex items-center gap-2 text-gray-300"
-              >
-                🔴 Reddit
-              </button>
-            </div>
-          {/if}
-        </div>
-      </div>
-    </div>
-  </div>
+	<!-- Enhanced title with more SEO context -->
+	<header class="mb-6 text-center">
+		<h1 class="text-3xl md:text-4xl font-bold mb-2 text-white">
+			{manga.title}
+			{#if manga.seoData.topCharacters.length > 0}
+				<span class="block text-xl text-pink-400 mt-2">
+					{manga.seoData.topCharacters.slice(0, 2).join(' & ')}
+				</span>
+			{/if}
+		</h1>
+		<div class="text-gray-400 text-sm space-y-1">
+			<p>
+				Reading Page {currentPage}
+				{#if manga.seoData.topTags.length > 0}
+					• {manga.seoData.topTags.slice(0, 3).join(', ')}
+				{/if}
+			</p>
+			{#if manga.seoData.primaryArtist}
+				<p>by <span class="text-pink-400">{manga.seoData.primaryArtist}</span></p>
+			{/if}
+		</div>
+		<p class="text-gray-500 text-xs mt-3">
+			💡 Click left/right sides of image to navigate • Use arrow keys
+		</p>
+	</header>
 
-  <!-- Enhanced images with SEO-rich alt tags -->
-  <section class="space-y-4 mb-8" aria-label="Manga pages">
-    {#each data.images as imageData, idx}
-      <div class="relative group">
-        <div
-          class="relative cursor-pointer select-none"
-          on:click={handleImageClick}
-          role="button"
-          tabindex="0"
-          aria-label="Click left or right to navigate pages"
-        >
-          <img
-            src={imageData.url}
-            alt={imageData.alt}
-            title={imageData.title}
-            class="w-full rounded-lg shadow-lg"
-            loading="lazy"
-            decoding="async"
-          />
-          
-          <!-- Click zones overlay (visible on hover) -->
-          <div class="absolute inset-0 flex opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            {#if currentPage > 1}
-              <div class="w-1/3 h-full flex items-center justify-start pl-4 bg-transparent rounded-l-lg">
-                <div class="bg-black bg-opacity-30 text-white px-2 py-1 rounded text-xs">
-                  ← Previous
-                </div>
-              </div>
-            {:else}
-              <div class="w-1/3 h-full"></div>
-            {/if}
-            
-            <div class="w-1/3 h-full"></div>
-            
-            {#if currentPage < totalPages}
-              <div class="w-1/3 h-full flex items-center justify-end pr-4 bg-transparent rounded-r-lg">
-                <div class="bg-black bg-opacity-30 text-white px-2 py-1 rounded text-xs">
-                  Next →
-                </div>
-              </div>
-            {:else}
-              <div class="w-1/3 h-full"></div>
-            {/if}
-          </div>
-        </div>
-        
-        <!-- Enhanced page number overlay with SEO keywords -->
-        <div class="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-          <div>Page {imageData.pageNumber}</div>
-          {#if manga.seoData.topTags.length > 0}
-            <div class="text-pink-300 text-xs">#{manga.seoData.topTags[0]}</div>
-          {/if}
-        </div>
-      </div>
-    {/each}
-  </section>
+	<!-- FIXED Share Section for Reading Pages -->
+	<div class="bg-gray-900 border border-gray-700 rounded-lg p-4 mb-6 max-w-2xl mx-auto">
+		<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+			<div>
+				<h3 class="font-medium text-gray-200 mb-1">
+					📖 Reading {manga.title}? Save your progress!
+				</h3>
+				<p class="text-sm text-gray-400">Copy URL to bookmark this exact page</p>
+			</div>
 
-  <!-- Enhanced pagination with better UX -->
-  <nav class="flex justify-center items-center flex-wrap gap-2 mb-8" aria-label="Pagination">
-    {#if currentPage > 1}
-      <button
-        class="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors"
-        on:click={() => goToPage(currentPage - 1)}
-        aria-label="Previous page"
-      >
-        ← Previous
-      </button>
-    {/if}
+			<div class="flex items-center gap-3">
+				<button
+					data-copy-button
+					on:click={copyPageUrl}
+					class="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+				>
+					📋 Copy Page URL
+				</button>
 
-    <!-- Smart pagination -->
-    {#each Array(totalPages) as _, i}
-      {#if i + 1 === 1 || i + 1 === totalPages || Math.abs(i + 1 - currentPage) <= 2}
-        <button
-          class={
-            i + 1 === currentPage
-              ? 'px-3 py-2 rounded bg-pink-600 text-white font-bold'
-              : 'px-3 py-2 rounded border bg-white text-black hover:bg-gray-100 transition-colors'
-          }
-          on:click={() => goToPage(i + 1)}
-          aria-label={`Go to page ${i + 1}`}
-          aria-current={i + 1 === currentPage ? 'page' : undefined}
-        >
-          {i + 1}
-        </button>
-      {:else if i + 1 === currentPage - 3 || i + 1 === currentPage + 3}
-        <span class="px-2 text-gray-500">...</span>
-      {/if}
-    {/each}
+				<!-- FIXED: Added data-share-container attribute -->
+				<div class="relative" data-share-container>
+					<button
+						on:click={() => (showShareOptions = !showShareOptions)}
+						class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors text-sm font-medium"
+					>
+						🔗 Share
+					</button>
 
-    {#if currentPage < totalPages}
-      <button
-        class="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors"
-        on:click={() => goToPage(currentPage + 1)}
-        aria-label="Next page"
-      >
-        Next →
-      </button>
-    {/if}
-  </nav>
+					{#if showShareOptions}
+						<div
+							class="absolute right-0 top-full mt-2 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-10 min-w-[150px]"
+						>
+							<button
+								on:click={shareToTwitter}
+								class="w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors text-sm flex items-center gap-2 text-gray-300"
+							>
+								🐦 Twitter
+							</button>
+							<button
+								on:click={shareToReddit}
+								class="w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors text-sm flex items-center gap-2 text-gray-300"
+							>
+								🔴 Reddit
+							</button>
+						</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
 
-  <!-- Bottom navigation -->
-  <nav class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 mb-8">
-    <a
-      href={`/hentai/${slug}`}
-      class="px-6 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors"
-    >
-      📖 Back to Gallery
-    </a>
-    <a
-      href="/"
-      class="px-6 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors"
-    >
-      🏠 Back to nhentai.pics
-    </a>
-  </nav>
+	<!-- Enhanced images with SEO-rich alt tags -->
+	<section class="space-y-4 mb-8" aria-label="Manga pages">
+		{#each data.images as imageData, idx}
+			<div class="relative group">
+				<div
+					class="relative cursor-pointer select-none"
+					on:click={handleImageClick}
+					role="button"
+					tabindex="0"
+					aria-label="Click left or right to navigate pages"
+				>
+					<img
+						src={imageData.url}
+						alt={imageData.alt}
+						title={imageData.title}
+						class="w-full rounded-lg shadow-lg"
+						loading="lazy"
+						decoding="async"
+					/>
 
-  <!-- Content sections with improved spacing -->
-  <div class="space-y-12">
-    <div class="my-16">
-      <AAdsMiddleBanner />
-    </div>
-    
-    <section aria-label="Similar manga recommendations" class="mt-16">
-      <SimilarManga 
-        tagIds={manga.tagIds} 
-        currentMangaId={manga.id} 
-      />
-    </section>
+					<!-- Click zones overlay (visible on hover) -->
+					<div
+						class="absolute inset-0 flex opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+					>
+						{#if currentPage > 1}
+							<div
+								class="w-1/3 h-full flex items-center justify-start pl-4 bg-transparent rounded-l-lg"
+							>
+								<div class="bg-black bg-opacity-30 text-white px-2 py-1 rounded text-xs">
+									← Previous
+								</div>
+							</div>
+						{:else}
+							<div class="w-1/3 h-full"></div>
+						{/if}
 
-    <div class="mt-16">
-      <AAdsBanner />
-    </div>
-    
-    <section aria-label="Popular manga" class="mt-16">
-      <RandomPost comics={data.randomComics} />
-    </section>
+						<div class="w-1/3 h-full"></div>
 
-    <section aria-label="Advertisement" class="mt-16">
-      <NativeAds />
-    </section>
-  </div>
+						{#if currentPage < totalPages}
+							<div
+								class="w-1/3 h-full flex items-center justify-end pr-4 bg-transparent rounded-r-lg"
+							>
+								<div class="bg-black bg-opacity-30 text-white px-2 py-1 rounded text-xs">
+									Next →
+								</div>
+							</div>
+						{:else}
+							<div class="w-1/3 h-full"></div>
+						{/if}
+					</div>
+				</div>
+
+				<!-- Enhanced page number overlay with SEO keywords -->
+				<div
+					class="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs"
+				>
+					<div>Page {imageData.pageNumber}</div>
+					{#if manga.seoData.topTags.length > 0}
+						<div class="text-pink-300 text-xs">#{manga.seoData.topTags[0]}</div>
+					{/if}
+				</div>
+			</div>
+		{/each}
+	</section>
+
+	<!-- Enhanced pagination with better UX -->
+	<nav class="flex justify-center items-center flex-wrap gap-2 mb-8" aria-label="Pagination">
+		{#if currentPage > 1}
+			<button
+				class="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors"
+				on:click={() => goToPage(currentPage - 1)}
+				aria-label="Previous page"
+			>
+				← Previous
+			</button>
+		{/if}
+
+		<!-- Smart pagination -->
+		{#each Array(totalPages) as _, i}
+			{#if i + 1 === 1 || i + 1 === totalPages || Math.abs(i + 1 - currentPage) <= 2}
+				<button
+					class={i + 1 === currentPage
+						? 'px-3 py-2 rounded bg-pink-600 text-white font-bold'
+						: 'px-3 py-2 rounded border bg-white text-black hover:bg-gray-100 transition-colors'}
+					on:click={() => goToPage(i + 1)}
+					aria-label={`Go to page ${i + 1}`}
+					aria-current={i + 1 === currentPage ? 'page' : undefined}
+				>
+					{i + 1}
+				</button>
+			{:else if i + 1 === currentPage - 3 || i + 1 === currentPage + 3}
+				<span class="px-2 text-gray-500">...</span>
+			{/if}
+		{/each}
+
+		{#if currentPage < totalPages}
+			<button
+				class="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors"
+				on:click={() => goToPage(currentPage + 1)}
+				aria-label="Next page"
+			>
+				Next →
+			</button>
+		{/if}
+	</nav>
+
+	<!-- Bottom navigation -->
+	<nav class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 mb-8">
+		<a
+			href={`/hentai/${slug}`}
+			class="px-6 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors"
+		>
+			📖 Back to Gallery
+		</a>
+		<a
+			href="/"
+			class="px-6 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors"
+		>
+			🏠 Back to readhentai.me
+		</a>
+	</nav>
+
+	<!-- Content sections with improved spacing -->
+	<div class="space-y-12">
+		<div class="my-16">
+			<AAdsMiddleBanner />
+		</div>
+
+		<section aria-label="Similar manga recommendations" class="mt-16">
+			<SimilarManga tagIds={manga.tagIds} currentMangaId={manga.id} />
+		</section>
+
+		<div class="mt-16">
+			<AAdsBanner />
+		</div>
+
+		<section aria-label="Popular manga" class="mt-16">
+			<RandomPost comics={data.randomComics} />
+		</section>
+
+		<section aria-label="Advertisement" class="mt-16">
+			<NativeAds />
+		</section>
+	</div>
 </main>
 
 <!-- FIXED: Close share dropdown when clicking outside -->
-<svelte:window on:click={(e) => {
-  const target = e.target as Element;
-  if (!target.closest('[data-share-container]')) {
-    showShareOptions = false;
-  }
-}} />
+<svelte:window
+	on:click={(e) => {
+		const target = e.target as Element
+		if (!target.closest('[data-share-container]')) {
+			showShareOptions = false
+		}
+	}}
+/>
 
 <style>
-  main {
-    background: linear-gradient(135deg, #000000 0%, #000000 100%);
-    min-height: 100vh;
-  }
-  
-  * {
-    transition: all 0.2s ease;
-  }
-  
-  button:focus-visible,
-  a:focus-visible {
-    outline: 2px solid #ec4899;
-    outline-offset: 2px;
-  }
+	main {
+		background: linear-gradient(135deg, #000000 0%, #000000 100%);
+		min-height: 100vh;
+	}
+
+	* {
+		transition: all 0.2s ease;
+	}
+
+	button:focus-visible,
+	a:focus-visible {
+		outline: 2px solid #ec4899;
+		outline-offset: 2px;
+	}
 </style>

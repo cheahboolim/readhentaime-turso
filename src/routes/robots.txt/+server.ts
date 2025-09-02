@@ -1,6 +1,6 @@
 // src/routes/robots.txt/+server.ts
 export async function GET() {
-  const robots = `User-agent: *
+	const robots = `User-agent: *
 Allow: /
 
 # Important content sections
@@ -13,7 +13,7 @@ Disallow: /api/
 Disallow: /admin/
 
 # Main sitemap
-Sitemap: https://nhentai.pics/sitemap.xml
+Sitemap: https://readhentai.me/sitemap.xml
 
 # Be respectful to servers
 Crawl-delay: 1
@@ -23,12 +23,12 @@ User-agent: Googlebot
 Crawl-delay: 1
 
 User-agent: Bingbot
-Crawl-delay: 2`;
+Crawl-delay: 2`
 
-  return new Response(robots, {
-    headers: {
-      'Content-Type': 'text/plain',
-      'Cache-Control': 'max-age=86400'
-    }
-  });
+	return new Response(robots, {
+		headers: {
+			'Content-Type': 'text/plain',
+			'Cache-Control': 'max-age=86400'
+		}
+	})
 }
