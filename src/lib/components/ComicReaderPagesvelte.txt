@@ -1,0 +1,100 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import Button from '$lib/components/ui/button.svelte';
+
+	export let slug: string;
+	export let title: string;
+	export let images: string[];
+	export let currentPage: number;
+	export let pageCount: number;
+	export let totalPages: number;
+
+	let scrollTarget: HTMLDivElement;
+	let isNavigating = false;
+	let imageLoadStates: boolean[] = [];
+
+	onMount(() => {
+		if (scrollTarget) {
+			scrollTarget.scrollIntoView({ behavior: 'smooth' });
+		}
+		// Initialize loading states
+		imageLoadStates = new Array(images.length).fill(false);
+	});
+
+	function goToPage(pageIndex: number) {
+		isNavigating = true;
+		const url = `/comic/${slug}/read?page=${pageIndex}`;
+		goto(url);
+	}
+
+	function handleImageLoad(index: number) {
+		imageLoadStates[index] = true;
+		imageLoadStates = [...imageLoadStates]; // Trigger reactivity
+	}
+
+	function handleImageError(index: number) {
+		imageLoadStates[index] = true; // Still mark as "loaded" to hide placeholder
+	}
+</script>
+
+<div class="space-y-4">
+	<div bind:this={scrollTarget}></div>
+
+	<h1 class="text-2xl font-bold">{title}</h1>
+
+	<!-- Show loading indicator when navigating -->
+	{#if isNavigating}
+		<div class="fixed top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-lg shadow-lg z-50">
+			Loading...
+		</div>
+	{/if}
+
+	<div class="space-y-2">
+		{#each images as img, index}
+			<div class="relative">
+				<!-- Image placeholder -->
+				{#if !imageLoadStates[index]}
+					<div class="w-full h-96 bg-gray-200 rounded-lg shadow flex items-center justify-center animate-pulse">
+						<div class="text-gray-500">
+							<svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+							</svg>
+						</div>
+					</div>
+				{/if}
+				
+				<!-- Actual image -->
+				<img
+					src={img}
+					alt={`Page ${currentPage * pageCount + index + 1}`}
+					loading="lazy"
+					class="w-full rounded-lg shadow {imageLoadStates[index] ? 'opacity-100' : 'opacity-0 absolute top-0'}"
+					on:load={() => handleImageLoad(index)}
+					on:error={() => handleImageError(index)}
+				/>
+			</div>
+		{/each}
+	</div>
+
+	<div class="flex justify-between mt-4">
+		{#if currentPage > 0}
+			<Button 
+				on:click={() => goToPage(currentPage - 1)} 
+				className="mr-2"
+				disabled={isNavigating}
+			>
+				{isNavigating ? 'Loading...' : 'Previous'}
+			</Button>
+		{/if}
+
+		{#if (currentPage + 1) * pageCount < totalPages}
+			<Button 
+				on:click={() => goToPage(currentPage + 1)}
+				disabled={isNavigating}
+			>
+				{isNavigating ? 'Loading...' : 'Next'}
+			</Button>
+		{/if}
+	</div>
+</div>

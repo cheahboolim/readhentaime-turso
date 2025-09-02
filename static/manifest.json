@@ -1,0 +1,21 @@
+{
+  "name": "NhentaiPics",
+  "short_name": "NhentaiPics",
+  "description": "Nhentai.Pic - NHentai Pictures, Manga and Doujinshi Search Engine, Free and Safe.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [
+    {
+      "src": "{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/android-chrome-192x192.jpg",
+      "sizes": "192x192",
+      "type": "image/jpg"
+    },
+    {
+      "src": "{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/android-chrome-512x512.jpg",
+      "sizes": "512x512",
+      "type": "image/jpg"
+    }
+  ]
+}

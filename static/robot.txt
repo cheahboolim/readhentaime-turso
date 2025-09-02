@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Important content sections
+Allow: /hentai/
+Allow: /browse/
+Allow: /p/
+
+# Block admin/api routes if any
+Disallow: /api/
+Disallow: /admin/
+
+# Sitemap locations
+Sitemap: https://nhentai.pics/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

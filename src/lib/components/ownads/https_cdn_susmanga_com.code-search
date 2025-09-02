@@ -1,0 +1,33 @@
+# Query: https://cdn.susmanga.com
+
+18 results - 6 files
+
+src\lib\components\ownads\coinpoll.svelte:
+  3:   export let image: string = '{import.meta.env.PUBLIC_CDN_BASE_URL}/alanding/7%20-%20meme/cover.jpg';
+
+src\routes\+layout.svelte:
+  36: 	<link rel="icon" type="image/png" sizes="16x16" href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/favicon-16x16.png" />
+  37: 	<link rel="icon" type="image/png" sizes="32x32" href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/favicon-32x32.png" />
+  38: 	<link rel="icon" href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/favicon.ico" sizes="any" />
+  39: 	<link rel="apple-touch-icon" href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/apple-touch-icon.png" />
+  40: 	<link rel="icon" type="image/png" sizes="192x192" href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/android-chrome-192x192.png" />
+  41: 	<link rel="icon" type="image/png" sizes="512x512" href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/android-chrome-512x512.png" />
+
+src\routes\+layout.ts.bak:
+  38: 		href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/favicon-16x16.png"
+  44: 		href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/favicon-32x32.png"
+  46: 	<link rel="icon" href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/favicon.ico" sizes="any" />
+  47: 	<link rel="apple-touch-icon" href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/apple-touch-icon.png" />
+  52: 		href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/android-chrome-192x192.png"
+  58: 		href="{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/android-chrome-512x512.png"
+
+src\routes\+page.svelte:
+  26: 	<meta property="og:image" content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/susmanga-home.jpg" />
+  35: 	<meta name="twitter:image" content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/susmanga-home.jpg" />
+
+src\routes\page-svelte-before-seo.txt:
+  27: 	<meta name="twitter:image" content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/susmanga-home-image.jpg" />
+
+static\manifest.json:
+  11:       "src": "{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/android-chrome-192x192.png",
+  16:       "src": "{import.meta.env.PUBLIC_CDN_BASE_URL}/favicon/android-chrome-512x512.png",
