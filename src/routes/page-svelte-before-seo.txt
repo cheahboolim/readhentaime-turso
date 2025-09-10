@@ -1,7 +1,7 @@
 <script lang="ts">
 	import AAdsBanner from '$lib/components/AAdsBanner.svelte'
 	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte'
-	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
+
 	import RandomHome from '$lib/components/RandomHome.svelte'
 	import TrafficStarsAd from '$lib/components/TrafficStarsAd.svelte'
 	export let data

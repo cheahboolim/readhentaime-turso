@@ -21,7 +21,6 @@
 		}
 	}
 
-	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
 	import TrafficStarsAd from '$lib/components/TrafficStarsAd.svelte'
 
 	// Helper function to highlight matching terms
@@ -248,6 +247,4 @@
 			</div>
 		{/if}
 	{/if}
-
-	<NativeAds />
 </main>

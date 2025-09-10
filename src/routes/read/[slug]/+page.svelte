@@ -11,7 +11,6 @@
 	import { seo } from '$lib/seo.ts'
 	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte'
 	import AAdsBanner from '$lib/components/AAdsBanner.svelte'
-	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
 
 	export let data
 	const { slug, comic, seo: seoData } = data
@@ -351,9 +350,7 @@
 		<RandomPost comics={data.randomComics} />
 	</div>
 
-	<div class="mt-12">
-		<NativeAds />
-	</div>
+	<div class="mt-12"></div>
 </main>
 
 <!-- FIXED: Close share dropdown when clicking outside -->

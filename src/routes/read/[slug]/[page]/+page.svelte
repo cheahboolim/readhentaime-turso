@@ -8,7 +8,7 @@
 	import RandomPost from '$lib/components/RandomPost.svelte'
 	import TrafficStarsAd from '$lib/components/TrafficStarsAd.svelte'
 	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte'
-	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
+
 	import AAdsBanner from '$lib/components/AAdsBanner.svelte'
 
 	export let data: {
@@ -576,9 +576,7 @@
 			<RandomPost comics={data.randomComics} />
 		</section>
 
-		<section aria-label="Advertisement" class="mt-16">
-			<NativeAds />
-		</section>
+		<section aria-label="Advertisement" class="mt-16"></section>
 	</div>
 </main>
 

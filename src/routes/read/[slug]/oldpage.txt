@@ -11,7 +11,7 @@
 	import { seo } from '$lib/seo.ts';
 	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte'
 	import AAdsBanner from '$lib/components/AAdsBanner.svelte'
-	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
+
 
 	export let data;
 	const { slug, comic, seo: seoData } = data;
@@ -347,7 +347,7 @@
 	</div>
 	
 	<div class="mt-12">
-		<NativeAds />
+		
 	</div>
 </main>
 

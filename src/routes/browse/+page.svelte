@@ -2,7 +2,7 @@
 <script lang="ts">
 	import AAdsBanner from '$lib/components/AAdsBanner.svelte'
 	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte'
-	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
+
 	import { goto } from '$app/navigation'
 
 	export let data
@@ -234,9 +234,7 @@
 	</div>
 
 	<!-- Native Ads -->
-	<div class="mt-8">
-		<NativeAds />
-	</div>
+	<div class="mt-8"></div>
 </main>
 
 <style>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { seo } from '$lib/seo.ts'
-	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
+
 	import TrafficStarsAd from '$lib/components/TrafficStarsAd.svelte'
 	import { page } from '$app/stores'
 
@@ -212,9 +212,9 @@
 			<div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed space-y-2">
 				{#if data.type === 'tags'}
 					<p>
-						Discover <strong>{data.totalManga} premium {data.name} hentai</strong> in our
-						curated collection. This tag features high-quality adult doujinshi with detailed artwork
-						and engaging storylines.
+						Discover <strong>{data.totalManga} premium {data.name} hentai</strong> in our curated
+						collection. This tag features high-quality adult doujinshi with detailed artwork and
+						engaging storylines.
 						{#if data.popularContent.characters.length > 0}
 							Popular characters include <strong
 								>{data.popularContent.characters.slice(0, 3).join(', ')}</strong
@@ -511,9 +511,7 @@
 	{/if}
 
 	<!-- Ad Placements -->
-	<div class="mt-12 space-y-8">
-		<NativeAds />
-	</div>
+	<div class="mt-12 space-y-8"></div>
 </main>
 
 <!-- FIXED: Close share dropdown when clicking outside -->

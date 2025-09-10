@@ -9,7 +9,7 @@
 	import RandomPost from '$lib/components/RandomPost.svelte'
 	import TrafficStarsAd from '$lib/components/TrafficStarsAd.svelte'
 	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte'
-	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
+
 	import AAdsBanner from '$lib/components/AAdsBanner.svelte'
 
 	export let data: {
@@ -353,7 +353,6 @@
 		<!-- Ad section -->
 		<section aria-label="Advertisement">
 			<TrafficStarsAd />
-			<NativeAds />
 		</section>
 	</div>
 </main>

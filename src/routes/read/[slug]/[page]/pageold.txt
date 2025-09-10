@@ -597,7 +597,7 @@
 
     <!-- Final ad section -->
     <section aria-label="Advertisement" class="mt-16">
-      <NativeAds />
+      
     </section>
   </div>
 </main>

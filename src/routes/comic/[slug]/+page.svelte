@@ -10,7 +10,6 @@
 	import { goto } from '$app/navigation'
 	import AAdsMiddleBanner from '$lib/components/AAdsMiddleBanner.svelte'
 	import AAdsBanner from '$lib/components/AAdsBanner.svelte'
-	import NativeAds from '$lib/components/adsterra/NativeAds.svelte'
 
 	export let data
 	const { slug, comic } = data
@@ -102,5 +101,4 @@
 	<SimilarManga tagIds={comic.tags.map((tag) => Number(tag.id))} currentMangaId={comic.id} />
 	<AAdsBanner />
 	<RandomPost comics={data.randomComics} />
-	<NativeAds />
 </main>
