@@ -16,6 +16,8 @@
 	import ExoClickSlider from '$lib/components/ExoClickSlider.svelte'
 	import ExoOutstreamAd from '$lib/components/ExoOutstreamAd.svelte'
 	import Coinpoll from '$lib/components/ownads/coinpoll.svelte'
+	import Popunder from '$lib/components/trafficstars/popunder.svelte'
+	import Videoslider from '$lib/components/trafficstars/videoslider.svelte'
 
 	// ✅ Google Analytics removed
 </script>
@@ -72,6 +74,7 @@
 	<div class="container mx-auto px-4 py-2">
 		<AppInstallBanner />
 	</div>
-
+	<Videoslider />
+	<Popunder />
 	<Footer />
 </div>
