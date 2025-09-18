@@ -45,6 +45,7 @@
 	"type": "module",
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.850.0",
+		"@libsql/client": "^0.15.15",
 		"@supabase/auth-ui-svelte": "^0.2.9",
 		"@supabase/ssr": "^0.5.1",
 		"@supabase/supabase-js": "^2.44.4",
