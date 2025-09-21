@@ -1,307 +1,418 @@
 /* eslint-disable prettier/prettier */
-//src/routes/read/[slug]/+page.server.ts - FULLY OPTIMIZED
 import { error } from '@sveltejs/kit'
-import { supabase } from '$lib/supabaseClient'
+import { db } from '$lib/server/db'
 
 type RelatedMeta = {
-	id: string
-	name: string
-	slug: string
+    id: string
+    name: string
+    slug: string
 }
 
-type JoinRow<T extends string> = {
-	[key in T]: RelatedMeta | null
-}
+// simple SQL escape for single quotes (values come from params / DB)
+const esc = (v: string) => v.replace(/'/g, "''")
 
 // Cache for random comics (reduces DB calls)
 let cachedRandomComics: any[] | null = null
 let randomComicsCacheTime = 0
 const RANDOM_CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
-export async function load({ params }) {
-	const slug = params.slug
+// Cache for page counts per manga
+const pageCountCache = new Map<string, { count: number; ts: number }>()
+const PAGE_COUNT_TTL = 5 * 60 * 1000 // 5 minutes
 
-	const { data: slugRow, error: slugErr } = await supabase
-		.from('slug_map')
-		.select('manga_id')
-		.eq('slug', slug)
-		.single()
+// id-range cache for random sampling (min/max ids)
+let cachedIdMinMax: { minId: number; maxId: number; ts: number } | null = null
+const ID_MINMAX_TTL = 60 * 1000 // 1 minute
 
-	if (slugErr || !slugRow) throw error(404, 'Comic not found')
+const safeNum = (v: any) => {
+    const n = Number(v)
+    return Number.isFinite(n) ? Math.floor(n) : 0
+}
 
-	const mangaId = slugRow.manga_id
+export async function load({ params, url }) {
+    const slug = params.slug
+    if (!slug) throw error(404, 'Comic not found')
 
-	// OPTIMIZED: Fetch manga info and page count in parallel
-	const [{ data: manga, error: mangaErr }, { count: pageCount }] = await Promise.all([
-		supabase
-			.from('manga')
-			.select('id, manga_id, title, feature_image_url, created_at')
-			.eq('id', mangaId)
-			.single(),
-		supabase.from('pages').select('*', { count: 'exact', head: true }).eq('manga_id', mangaId)
-	])
+    // 1) Resolve slug -> manga_id
+    let slugRow
+    try {
+        const q = `SELECT manga_id FROM slug_map WHERE slug = '${esc(slug)}' LIMIT 1;`
+        const res = await db.execute(q)
+        slugRow = res.rows?.[0]
+    } catch (err) {
+        console.error('Turso slug lookup error', err)
+        throw error(404, 'Comic not found')
+    }
 
-	if (mangaErr || !manga) throw error(404, 'Comic not found')
+    if (!slugRow || !slugRow.manga_id) throw error(404, 'Comic not found')
+    const mangaId = slugRow.manga_id as string
 
-	// OPTIMIZED: Batch fetch all related data in parallel (6 queries instead of 7+ individual)
-	const [
-		{ data: pages },
-		{ data: artistsData },
-		{ data: tagsData },
-		{ data: groupsData },
-		{ data: categoriesData },
-		{ data: languagesData },
-		{ data: parodiesData },
-		{ data: charactersData }
-	] = await Promise.all([
-		supabase
-			.from('pages')
-			.select('image_url')
-			.eq('manga_id', mangaId)
-			.order('page_number', { ascending: true }),
-		supabase.from('manga_artists').select('artist_id(id, name, slug)').eq('manga_id', mangaId),
-		supabase.from('manga_tags').select('tag_id(id, name, slug)').eq('manga_id', mangaId),
-		supabase.from('manga_groups').select('group_id(id, name, slug)').eq('manga_id', mangaId),
-		supabase.from('manga_categories').select('category_id(id, name, slug)').eq('manga_id', mangaId),
-		supabase.from('manga_languages').select('language_id(id, name, slug)').eq('manga_id', mangaId),
-		supabase.from('manga_parodies').select('parody_id(id, name, slug)').eq('manga_id', mangaId),
-		supabase.from('manga_characters').select('character_id(id, name, slug)').eq('manga_id', mangaId)
-	])
+    // 2) Fetch manga and pages count in parallel (count is cached)
+    let manga: any = null
+    let pageCount = 0
+    try {
+        const now = Date.now()
+        let cached = pageCountCache.get(String(mangaId))
+        if (!cached || now - cached.ts > PAGE_COUNT_TTL) {
+            const countRes = await db.execute(`SELECT COUNT(*) AS count FROM pages WHERE manga_id = '${esc(mangaId)}';`)
+            pageCount = safeNum(countRes.rows?.[0]?.count)
+            pageCountCache.set(String(mangaId), { count: pageCount, ts: now })
+        } else {
+            pageCount = cached.count
+        }
 
-	// Process related data
-	const artists = (artistsData || []).map((row) => row.artist_id).filter(Boolean) as RelatedMeta[]
+        const mangaRes = await db.execute(
+            `SELECT id, manga_id, title, feature_image_url, created_at FROM manga WHERE id = '${esc(mangaId)}' LIMIT 1;`
+        )
+        manga = mangaRes.rows?.[0] ?? null
+    } catch (err) {
+        console.error('Turso manga/pages count error', err)
+        throw error(404, 'Comic not found')
+    }
 
-	const tags = (tagsData || []).map((row) => row.tag_id).filter(Boolean) as RelatedMeta[]
+    if (!manga) throw error(404, 'Comic not found')
 
-	const groups = (groupsData || []).map((row) => row.group_id).filter(Boolean) as RelatedMeta[]
+    // 3) Fetch pages image urls.
+    // To avoid massive reads for very large releases, only fetch all pages when ?full=1 is provided.
+    const MAX_PAGES_FETCH = 500 // safe default upper bound for full fetch on this route
+    const wantFull = url.searchParams.get('full') === '1' // manual override if frontend requests all pages
+    let pages: { image_url: string }[] = []
+    let partialPages = false
+    let maxPagesFetched = 0
+    try {
+        if (pageCount <= MAX_PAGES_FETCH || wantFull) {
+            const pagesRes = await db.execute(
+                `SELECT image_url FROM pages WHERE manga_id = '${esc(mangaId)}' ORDER BY page_number ASC;`
+            )
+            pages = (pagesRes.rows ?? []) as { image_url: string }[]
+            partialPages = false
+            maxPagesFetched = pages.length
+        } else {
+            // fetch a limited prefix: first N pages (useful for previews) and let frontend lazy-load the rest via an API
+            const pagesRes = await db.execute(
+                `SELECT image_url FROM pages WHERE manga_id = '${esc(mangaId)}' ORDER BY page_number ASC LIMIT ${MAX_PAGES_FETCH};`
+            )
+            pages = (pagesRes.rows ?? []) as { image_url: string }[]
+            partialPages = true
+            maxPagesFetched = pages.length
+        }
+    } catch (err) {
+        console.error('Turso pages fetch error', err)
+        pages = []
+    }
 
-	const categories = (categoriesData || [])
-		.map((row) => row.category_id)
-		.filter(Boolean) as RelatedMeta[]
+    // 4) Fetch related metadata via joins (parallel). Keep reasonable limits where appropriate.
+    const RELATED_LIMIT = 200
+    const [
+        artistsData,
+        tagsData,
+        groupsData,
+        categoriesData,
+        languagesData,
+        parodiesData,
+        charactersData
+    ] = await Promise.all([
+        (async () =>
+            (
+                await db.execute(
+                    `SELECT a.id, a.name, a.slug FROM manga_artists ma JOIN artists a ON ma.artist_id = a.id WHERE ma.manga_id = '${esc(
+                        mangaId
+                    )}' LIMIT ${RELATED_LIMIT};`
+                )
+            ).rows ?? [])(),
+        (async () =>
+            (
+                await db.execute(
+                    `SELECT t.id, t.name, t.slug FROM manga_tags mt JOIN tags t ON mt.tag_id = t.id WHERE mt.manga_id = '${esc(
+                        mangaId
+                    )}' LIMIT ${RELATED_LIMIT};`
+                )
+            ).rows ?? [])(),
+        (async () =>
+            (
+                await db.execute(
+                    `SELECT g.id, g.name, g.slug FROM manga_groups mg JOIN groups g ON mg.group_id = g.id WHERE mg.manga_id = '${esc(
+                        mangaId
+                    )}' LIMIT ${RELATED_LIMIT};`
+                )
+            ).rows ?? [])(),
+        (async () =>
+            (
+                await db.execute(
+                    `SELECT c.id, c.name, c.slug FROM manga_categories mc JOIN categories c ON mc.category_id = c.id WHERE mc.manga_id = '${esc(
+                        mangaId
+                    )}' LIMIT ${RELATED_LIMIT};`
+                )
+            ).rows ?? [])(),
+        (async () =>
+            (
+                await db.execute(
+                    `SELECT l.id, l.name, l.slug FROM manga_languages ml JOIN languages l ON ml.language_id = l.id WHERE ml.manga_id = '${esc(
+                        mangaId
+                    )}' LIMIT ${RELATED_LIMIT};`
+                )
+            ).rows ?? [])(),
+        (async () =>
+            (
+                await db.execute(
+                    `SELECT p.id, p.name, p.slug FROM manga_parodies mp JOIN parodies p ON mp.parody_id = p.id WHERE mp.manga_id = '${esc(
+                        mangaId
+                    )}' LIMIT ${RELATED_LIMIT};`
+                )
+            ).rows ?? [])(),
+        (async () =>
+            (
+                await db.execute(
+                    `SELECT ch.id, ch.name, ch.slug FROM manga_characters mc JOIN characters ch ON mc.character_id = ch.id WHERE mc.manga_id = '${esc(
+                        mangaId
+                    )}' LIMIT ${RELATED_LIMIT};`
+                )
+            ).rows ?? [])()
+    ])
 
-	const languages = (languagesData || [])
-		.map((row) => row.language_id)
-		.filter(Boolean) as RelatedMeta[]
+    const artists = (artistsData || []) as RelatedMeta[]
+    const tags = (tagsData || []) as RelatedMeta[]
+    const groups = (groupsData || []) as RelatedMeta[]
+    const categories = (categoriesData || []) as RelatedMeta[]
+    const languages = (languagesData || []) as RelatedMeta[]
+    const parodies = (parodiesData || []) as RelatedMeta[]
+    const characters = (charactersData || []) as RelatedMeta[]
 
-	const parodies = (parodiesData || []).map((row) => row.parody_id).filter(Boolean) as RelatedMeta[]
+    // 5) Cache and compute random comics (replace expensive ORDER BY RANDOM())
+    let randomComics: any[] = []
+    const now = Date.now()
 
-	const characters = (charactersData || [])
-		.map((row) => row.character_id)
-		.filter(Boolean) as RelatedMeta[]
+    if (!cachedRandomComics || now - randomComicsCacheTime > RANDOM_CACHE_DURATION) {
+        const RANDOM_LIMIT = 8
+        let finalRandomManga: any[] = []
 
-	// OPTIMIZED: Cache random comics to reduce DB load
-	let randomComics = []
-	const now = Date.now()
+        try {
+            // Get id min/max (cached) and sample by id-range. This avoids scanning entire table.
+            const now2 = Date.now()
+            if (!cachedIdMinMax || now2 - cachedIdMinMax.ts > ID_MINMAX_TTL) {
+                const mm = await db.execute('SELECT MIN(id) AS minId, MAX(id) AS maxId FROM manga;')
+                cachedIdMinMax = {
+                    minId: safeNum(mm.rows?.[0]?.minId),
+                    maxId: safeNum(mm.rows?.[0]?.maxId),
+                    ts: now2
+                }
+            }
+            const minId = cachedIdMinMax?.minId ?? 0
+            const maxId = cachedIdMinMax?.maxId ?? 0
 
-	if (!cachedRandomComics || now - randomComicsCacheTime > RANDOM_CACHE_DURATION) {
-		const RANDOM_LIMIT = 8
-		const randomSeed = Math.floor(Math.random() * 1000000)
+            if (minId && maxId && maxId >= minId) {
+                // attempt to sample a small window starting at a pseudo-random id
+                const attempts = RANDOM_LIMIT * 4
+                const picked: any[] = []
+                const seenIds = new Set<string | number>()
+                for (let i = 0; i < attempts && picked.length < RANDOM_LIMIT * 2; i++) {
+                    const randId = Math.floor(Math.random() * (maxId - minId + 1)) + minId
+                    try {
+                        const r = await db.execute(
+                            `SELECT id, title, feature_image_url FROM manga WHERE id >= ${randId} ORDER BY id ASC LIMIT 1;`
+                        )
+                        const row = (r.rows ?? [])[0]
+                        if (row && !seenIds.has(String(row.id))) {
+                            seenIds.add(String(row.id))
+                            picked.push(row)
+                        }
+                    } catch (e) {
+                        // ignore per-attempt errors
+                    }
+                }
+                finalRandomManga = picked
+            }
 
-		// Try RPC first, fallback if needed
-		const { data: randomManga, error: randomError } = await supabase.rpc('get_random_manga', {
-			seed_value: randomSeed / 1000000,
-			limit_count: RANDOM_LIMIT,
-			offset_count: 0
-		})
+            // If id-range sampling produced nothing (very sparse ids or other), fallback to a small random slice using LIMIT
+            if ((!finalRandomManga || finalRandomManga.length === 0)) {
+                const randRes = await db.execute(
+                    `SELECT id, title, feature_image_url FROM manga ORDER BY rowid DESC LIMIT ${RANDOM_LIMIT * 5};`
+                )
+                finalRandomManga = (randRes.rows ?? []) as any[]
+            }
 
-		let finalRandomManga = []
+            // Shuffle and pick final RANDOM_LIMIT
+            if (finalRandomManga && finalRandomManga.length > 0) {
+                finalRandomManga = finalRandomManga
+                    .map((item) => ({ ...item, __r: Math.random() }))
+                    .sort((a, b) => a.__r - b.__r)
+                    .slice(0, RANDOM_LIMIT)
+                    .map(({ __r, ...it }) => it)
+            }
+        } catch (err) {
+            console.error('Turso random sampling error', err)
+            finalRandomManga = []
+        }
 
-		if (randomError || !randomManga) {
-			// Fallback: get random manga
-			const { data: fallback } = await supabase
-				.from('manga')
-				.select('id, title, feature_image_url')
-				.limit(RANDOM_LIMIT * 2)
+        // Get slugs for random manga in one batched query
+        if (finalRandomManga.length > 0) {
+            const randomMangaIds = finalRandomManga.map((m) => m.id as string)
+            const idsList = randomMangaIds.map((id) => `'${esc(String(id))}'`).join(',')
+            try {
+                const slugsRes = await db.execute(`SELECT slug, manga_id FROM slug_map WHERE manga_id IN (${idsList});`)
+                const randomSlugs = slugsRes.rows ?? []
+                cachedRandomComics = finalRandomManga.map((item) => ({
+                    id: item.id,
+                    title: item.title,
+                    slug: (randomSlugs.find((s: any) => String(s.manga_id) === String(item.id))?.slug) ?? '',
+                    featureImage: item.feature_image_url,
+                    author: { name: 'Unknown' }
+                }))
+            } catch (err) {
+                console.error('Turso random slugs error', err)
+                cachedRandomComics = finalRandomManga.map((item) => ({
+                    id: item.id,
+                    title: item.title,
+                    slug: '',
+                    featureImage: item.feature_image_url,
+                    author: { name: 'Unknown' }
+                }))
+            }
+        } else {
+            cachedRandomComics = []
+        }
 
-			if (fallback) {
-				finalRandomManga = fallback
-					.map((item) => ({ ...item, sort: Math.random() }))
-					.sort((a, b) => a.sort - b.sort)
-					.slice(0, RANDOM_LIMIT)
-					.map(({ sort, ...item }) => item)
-			}
-		} else {
-			finalRandomManga = randomManga
-		}
+        randomComicsCacheTime = now
+    }
 
-		// Get slugs for random manga
-		if (finalRandomManga.length > 0) {
-			const randomMangaIds = finalRandomManga.map((m: any) => m.id)
-			const { data: randomSlugs } = await supabase
-				.from('slug_map')
-				.select('slug, manga_id')
-				.in('manga_id', randomMangaIds)
+    randomComics = cachedRandomComics || []
 
-			if (randomSlugs) {
-				cachedRandomComics = finalRandomManga.map((item: any) => ({
-					id: item.id,
-					title: item.title,
-					slug: randomSlugs.find((s) => s.manga_id === item.id)?.slug ?? '',
-					featureImage: item.feature_image_url,
-					author: { name: 'Unknown' }
-				}))
-			}
-		}
+    // 6) SEO and metadata generation (kept similar to previous logic)
+    const topCharacters = characters.slice(0, 2).map((c) => c.name)
+    const topTags = tags.slice(0, 3).map((t) => t.name)
+    const topParody = parodies.length > 0 ? parodies[0].name : ''
+    const primaryArtist = artists.length > 0 ? artists[0].name : ''
+    const totalPages = pageCount || pages.length || 0
 
-		randomComicsCacheTime = now
-	}
+    const generateSEODescription = () => {
+        let desc = `📖 Read ${manga.title} hentai manga online free! `
+        if (topCharacters.length > 0) {
+            desc += `Featuring ${topCharacters.join(' and ')} characters`
+            if (topParody) desc += ` from ${topParody}`
+            desc += '. '
+        }
+        if (totalPages > 0) desc += `${totalPages} high-quality pages. `
+        if (topTags.length > 0) desc += `Tags: ${topTags.slice(0, 2).join(', ')}. `
+        desc += 'No signup required, mobile-friendly reader! 🔞'
+        return desc
+    }
 
-	randomComics = cachedRandomComics || []
+    const generateImageAlt = () => {
+        let alt = `${manga.title} hentai manga cover`
+        if (topCharacters.length > 0) alt += ` featuring ${topCharacters[0]}`
+        if (topParody) alt += ` ${topParody} parody`
+        if (topTags.length > 0) alt += ` - ${topTags.slice(0, 2).join(' ')} adult doujinshi`
+        if (primaryArtist) alt += ` by ${primaryArtist}`
+        return alt
+    }
 
-	// Enhanced SEO data generation
-	const topCharacters = characters.slice(0, 2).map((c) => c.name)
-	const topTags = tags.slice(0, 3).map((t) => t.name)
-	const topParody = parodies.length > 0 ? parodies[0].name : ''
-	const primaryArtist = artists.length > 0 ? artists[0].name : ''
-	const totalPages = pageCount || pages?.length || 0
+    const generateImageTitle = () => {
+        let title = `Read ${manga.title} online`
+        if (topCharacters.length > 0) title += ` - ${topCharacters[0]} adult manga`
+        if (topTags.length > 0) title += ` - ${topTags[0]} doujinshi`
+        title += ' - Free hentai reader'
+        return title
+    }
 
-	// Generate rich SEO descriptions
-	const generateSEODescription = () => {
-		let desc = `📖 Read ${manga.title} hentai manga online free! `
-		if (topCharacters.length > 0) {
-			desc += `Featuring ${topCharacters.join(' and ')} characters`
-			if (topParody) desc += ` from ${topParody}`
-			desc += '. '
-		}
-		if (totalPages > 0) desc += `${totalPages} high-quality pages. `
-		if (topTags.length > 0) desc += `Tags: ${topTags.slice(0, 2).join(', ')}. `
-		desc += 'No signup required, mobile-friendly reader! 🔞'
-		return desc
-	}
+    const socialTitle =
+        topCharacters.length > 0
+            ? `🔞 ${manga.title} | ${topCharacters[0]}${topParody ? ` ${topParody}` : ''} Hentai | Free Read`
+            : `🔞 ${manga.title} | ${topTags.slice(0, 2).join(' ')} Hentai Manga | Free Online`
 
-	// Enhanced image alt text for feature image
-	const generateImageAlt = () => {
-		let alt = `${manga.title} hentai manga cover`
-		if (topCharacters.length > 0) alt += ` featuring ${topCharacters[0]}`
-		if (topParody) alt += ` ${topParody} parody`
-		if (topTags.length > 0) alt += ` - ${topTags.slice(0, 2).join(' ')} adult doujinshi`
-		if (primaryArtist) alt += ` by ${primaryArtist}`
-		return alt
-	}
+    const socialDescription = generateSEODescription().replace(/📖|🔞/g, '').trim()
 
-	const generateImageTitle = () => {
-		let title = `Read ${manga.title} online`
-		if (topCharacters.length > 0) title += ` - ${topCharacters[0]} adult manga`
-		if (topTags.length > 0) title += ` - ${topTags[0]} doujinshi`
-		title += ' - Free hentai reader'
-		return title
-	}
+    const keywords = [
+        manga.title.toLowerCase(),
+        ...topCharacters.map((c) => c.toLowerCase()),
+        ...topTags.map((t) => t.toLowerCase()),
+        topParody.toLowerCase(),
+        primaryArtist.toLowerCase(),
+        'hentai',
+        'manga',
+        'doujinshi',
+        'adult manga',
+        'free online',
+        'read free'
+    ]
+        .filter(Boolean)
+        .join(', ')
 
-	// Social sharing optimized data
-	const socialTitle =
-		topCharacters.length > 0
-			? `🔞 ${manga.title} | ${topCharacters[0]}${topParody ? ` ${topParody}` : ''} Hentai | Free Read`
-			: `🔞 ${manga.title} | ${topTags.slice(0, 2).join(' ')} Hentai Manga | Free Online`
-
-	const socialDescription = generateSEODescription().replace(/📖|🔞/g, '').trim()
-
-	// Keywords for meta tags
-	const keywords = [
-		manga.title.toLowerCase(),
-		...topCharacters.map((c) => c.toLowerCase()),
-		...topTags.map((t) => t.toLowerCase()),
-		topParody.toLowerCase(),
-		primaryArtist.toLowerCase(),
-		'hentai',
-		'manga',
-		'doujinshi',
-		'adult manga',
-		'free online',
-		'read free'
-	]
-		.filter(Boolean)
-		.join(', ')
-
-	return {
-		slug,
-		comic: {
-			id: manga.id,
-			mangaId: manga.manga_id,
-			title: manga.title,
-			feature_image_url: manga.feature_image_url,
-			// REMOVED: publishedAt (no longer exposed to frontend)
-			totalPages,
-			previewImages: pages?.map((p) => p.image_url) ?? [],
-			artists,
-			tags,
-			groups,
-			categories,
-			languages,
-			parodies,
-			characters,
-			// Enhanced SEO metadata
-			seoData: {
-				primaryArtist,
-				topCharacters,
-				topTags,
-				topParody,
-				imageAlt: generateImageAlt(),
-				imageTitle: generateImageTitle(),
-				description: generateSEODescription(),
-				socialTitle,
-				socialDescription,
-				keywords
-			}
-		},
-		randomComics,
-		// Enhanced SEO object
-		seo: {
-			title: `${manga.title}${topCharacters.length > 0 ? ` - ${topCharacters[0]}` : ''}${topParody ? ` ${topParody} Parody` : ''} | Free Hentai Manga`,
-			description: generateSEODescription(),
-			canonical: `https://readhentai.me/read/${slug}`,
-			keywords,
-			// Enhanced Open Graph
-			ogTitle: socialTitle,
-			ogDescription: socialDescription,
-			ogImage: manga.feature_image_url,
-			ogType: 'article',
-			ogSiteName: 'Read Hentai Pics - Free Adult Manga',
-			ogLocale: 'en_US',
-			// Article specific OG tags
-			articleAuthor: primaryArtist,
-			articlePublishedTime: manga.created_at,
-			articleSection: 'Adult Manga',
-			articleTags: [...topTags, ...topCharacters, topParody].filter(Boolean),
-			// Twitter Card enhancements
-			twitterCard: 'summary_large_image',
-			twitterTitle: socialTitle,
-			twitterDescription: socialDescription,
-			twitterImage: manga.feature_image_url,
-			twitterSite: '@Read Hentaipics',
-			// Enhanced structured data
-			structuredData: {
-				'@context': 'https://schema.org',
-				'@type': 'Book',
-				name: manga.title,
-				description: socialDescription,
-				url: `https://readhentai.me/read/${slug}`,
-				image: manga.feature_image_url,
-				datePublished: manga.created_at,
-				numberOfPages: totalPages,
-				genre: topTags,
-				character: topCharacters,
-				about: topParody,
-				author: {
-					'@type': 'Person',
-					name: primaryArtist || 'Unknown Artist'
-				},
-				publisher: {
-					'@type': 'Organization',
-					name: 'Read Hentai Pics',
-					url: 'https://readhentai.me'
-				},
-				offers: {
-					'@type': 'Offer',
-					price: '0',
-					priceCurrency: 'USD',
-					availability: 'https://schema.org/InStock'
-				},
-				aggregateRating: {
-					'@type': 'AggregateRating',
-					ratingValue: '4.5',
-					reviewCount: '100'
-				}
-			}
-		}
-	}
+    return {
+        slug,
+        comic: {
+            id: manga.id,
+            mangaId: manga.manga_id,
+            title: manga.title,
+            feature_image_url: manga.feature_image_url,
+            totalPages,
+            previewImages: pages.map((p) => p.image_url) ?? [],
+            partialPages, // true if we returned a limited prefix
+            maxPagesFetched, // how many page rows were fetched
+            artists,
+            tags,
+            groups,
+            categories,
+            languages,
+            parodies,
+            characters,
+            seoData: {
+                primaryArtist,
+                topCharacters,
+                topTags,
+                topParody,
+                imageAlt: generateImageAlt(),
+                imageTitle: generateImageTitle(),
+                description: generateSEODescription(),
+                socialTitle,
+                socialDescription,
+                keywords
+            }
+        },
+        randomComics,
+        seo: {
+            title: `${manga.title}${topCharacters.length > 0 ? ` - ${topCharacters[0]}` : ''}${
+                topParody ? ` ${topParody} Parody` : ''
+            } | Free Hentai Manga`,
+            description: generateSEODescription(),
+            canonical: `https://readhentai.me/read/${slug}`,
+            keywords,
+            ogTitle: socialTitle,
+            ogDescription: socialDescription,
+            ogImage: manga.feature_image_url,
+            ogType: 'article',
+            ogSiteName: 'Read Hentai Pics - Free Adult Manga',
+            ogLocale: 'en_US',
+            articleAuthor: primaryArtist,
+            articlePublishedTime: manga.created_at,
+            articleSection: 'Adult Manga',
+            articleTags: [...topTags, ...topCharacters, topParody].filter(Boolean),
+            twitterCard: 'summary_large_image',
+            twitterTitle: socialTitle,
+            twitterDescription: socialDescription,
+            twitterImage: manga.feature_image_url,
+            twitterSite: '@Read Hentaipics',
+            structuredData: {
+                '@context': 'https://schema.org',
+                '@type': 'Book',
+                name: manga.title,
+                description: socialDescription,
+                url: `https://readhentai.me/read/${slug}`,
+                image: manga.feature_image_url,
+                datePublished: manga.created_at,
+                numberOfPages: totalPages,
+                genre: topTags,
+                character: topCharacters,
+                about: topParody,
+                author: {
+                    '@type': 'Person',
+                    name: primaryArtist || 'Unknown Artist'
+                },
+                publisher: {
+                    '@type': 'Organization',
+                    name: 'Read Hentai Pics',
+                    url: 'https://readhentai.me'
+                }
+            }
+        }
+    }
 }
