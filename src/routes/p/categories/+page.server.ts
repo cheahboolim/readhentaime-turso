@@ -17,6 +17,12 @@ let groupedCache: {
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
 export const load: PageServerLoad = async ({ url }) => {
+    // Set Cache-Control header for Cloudflare edge caching (1 year)
+    if (typeof globalThis.setHeaders === 'function') {
+        globalThis.setHeaders({
+            'Cache-Control': 'public, max-age=31536000, immutable'
+        })
+    }
     // query params:
     // ?letter=A  -> return only categories under A
     // ?refresh=1 -> force refresh cache

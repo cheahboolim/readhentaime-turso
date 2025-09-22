@@ -2,7 +2,7 @@
 import { supabase } from '$lib/supabaseClient'
 
 const SITE_URL = 'https://readhentai.me'
-const URLS_PER_SITEMAP = 25000
+	const URLS_PER_SITEMAP = 25000 // Google max is 50,000, but 25k is safer for performance
 
 export async function GET() {
 	try {
@@ -52,8 +52,9 @@ export async function GET() {
 			.select('id', { count: 'exact', head: true })
 			.not('manga_id', 'is', null)
 
+		// Remove artificial cap, allow up to 50,000 sitemaps (Google limit)
 		const pageChunks = Math.ceil((totalPages || 0) / URLS_PER_SITEMAP)
-		const maxChunks = Math.min(pageChunks, 200) // Increased cap
+		const maxChunks = Math.min(pageChunks, 50000)
 
 		for (let i = 0; i < maxChunks; i++) {
 			sitemaps.push({
@@ -77,7 +78,7 @@ ${sitemaps
 		return new Response(sitemapIndex, {
 			headers: {
 				'Content-Type': 'application/xml',
-				'Cache-Control': 'max-age=86400'
+				'Cache-Control': 'public, max-age=2592000, immutable'
 			}
 		})
 	} catch (error) {
@@ -106,7 +107,7 @@ ${fallbackSitemaps
 		return new Response(fallbackIndex, {
 			headers: {
 				'Content-Type': 'application/xml',
-				'Cache-Control': 'max-age=3600'
+				'Cache-Control': 'public, max-age=3600'
 			},
 			status: 500
 		})

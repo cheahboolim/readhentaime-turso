@@ -72,7 +72,7 @@ export async function GET() {
 	return new Response(sitemap, {
 		headers: {
 			'Content-Type': 'application/xml',
-			'Cache-Control': 'max-age=86400'
+			'Cache-Control': 'public, max-age=2592000, immutable'
 		}
 	})
 }

@@ -16,7 +16,30 @@
 
 <svelte:head>
 	<title>Sitemap Statistics | Read Hentai Admin</title>
+	<meta name="description" content="Sitemap statistics for ReadHentai.me" />
+	<link rel="canonical" href="https://readhentai.me/sitemap-stats" />
+	<meta name="keywords" content="sitemap, stats, hentai, manga, doujinshi, adult comics" />
 	<meta name="robots" content="noindex, nofollow" />
+	<!-- Open Graph tags -->
+	<meta property="og:title" content="Sitemap Statistics | Read Hentai Admin" />
+	<meta property="og:description" content="Sitemap statistics for ReadHentai.me" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://readhentai.me/sitemap-stats" />
+	<meta property="og:site_name" content="Read Hentai" />
+	<!-- Twitter Card -->
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="Sitemap Statistics | Read Hentai Admin" />
+	<meta name="twitter:description" content="Sitemap statistics for ReadHentai.me" />
+	<!-- Structured Data: WebPage JSON-LD -->
+	<script type="application/ld+json">
+		{JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'WebPage',
+			'name': 'Sitemap Statistics | Read Hentai Admin',
+			'description': 'Sitemap statistics for ReadHentai.me',
+			'url': 'https://readhentai.me/sitemap-stats'
+		})}
+	</script>
 </svelte:head>
 
 <main class="container mx-auto px-4 py-8">

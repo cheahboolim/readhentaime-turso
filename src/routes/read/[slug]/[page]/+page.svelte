@@ -258,13 +258,18 @@
 </script>
 
 <svelte:head>
-	<title>{pageTitle}</title>
+	<title>{pageTitle} | ReadHentai.Me</title>
 	<meta name="description" content={data.seo.description} />
+	<!-- Improved meta description for SEO -->
+	<meta name="description" content={`Read ${manga.title} page ${currentPage} - ${data.seo.description}`} />
 	<meta name="keywords" content={data.seo.keywords} />
+	<!-- Add additional relevant keywords -->
+	<meta name="keywords" content={`hentai, manga, doujinshi, ${manga.title}, page ${currentPage}, ${data.seo.keywords}`} />
 	<link rel="canonical" href={data.seo.canonical} />
 
 	<!-- Enhanced Open Graph -->
 	<meta property="og:type" content={data.seo.ogType} />
+	<meta property="og:updated_time" content={data.seo.articlePublishedTime} />
 	<meta property="og:site_name" content={data.seo.ogSiteName} />
 	<meta property="og:locale" content={data.seo.ogLocale} />
 	<meta property="og:url" content={data.seo.canonical} />
@@ -276,10 +281,11 @@
 	<meta property="og:image:height" content="630" />
 	<meta
 		property="og:image:alt"
-		content="{manga.title} page {currentPage} - {manga.seoData.topTags
-			.slice(0, 2)
-			.join(' ')} hentai manga"
-	/>
+		content={`Read ${manga.title} page ${currentPage} - ${manga.seoData.topTags.slice(0,2).join(' ')} hentai manga`} />
+	<!-- Add og:author if available -->
+	{#if data.seo.articleAuthor}
+		<meta property="og:author" content={data.seo.articleAuthor} />
+	{/if}
 
 	<!-- Article-specific OG tags -->
 	{#if data.seo.articleAuthor}
@@ -297,7 +303,11 @@
 	<meta name="twitter:title" content={data.seo.twitterTitle} />
 	<meta name="twitter:description" content={data.seo.twitterDescription} />
 	<meta name="twitter:image" content={data.seo.twitterImage} />
-	<meta name="twitter:image:alt" content="{manga.title} page {currentPage} - read online free" />
+	<meta name="twitter:image:alt" content={`Read ${manga.title} page ${currentPage} - read online free`} />
+	<!-- Add twitter:creator if available -->
+	{#if data.seo.articleAuthor}
+		<meta name="twitter:creator" content={data.seo.articleAuthor} />
+	{/if}
 
 	<!-- Twitter Labels for Rich Cards -->
 	<meta name="twitter:label1" content="Progress" />
@@ -320,9 +330,24 @@
 		<link rel="next" href={data.seo.next} />
 	{/if}
 
-	<!-- Structured Data -->
+	<!-- Structured Data: Improved for SEO -->
 	<script type="application/ld+json">
-    {JSON.stringify(data.seo.jsonLd)}
+	{JSON.stringify({
+		"@context": "https://schema.org",
+		"@type": "ComicIssue",
+		"name": `${manga.title} - Page ${currentPage}`,
+		"image": data.images?.[0]?.url,
+		"author": manga.seoData.primaryArtist || "Read Hentai Pics",
+		"datePublished": data.seo.articlePublishedTime,
+		"headline": pageTitle,
+		"description": data.seo.description,
+		"keywords": data.seo.keywords,
+		"url": data.seo.canonical,
+		"isPartOf": {
+			"@type": "ComicSeries",
+			"name": manga.title
+		}
+	})}
 	</script>
 </svelte:head>
 
@@ -449,8 +474,8 @@
 				>
 					<img
 						src={imageData.url}
-						alt={imageData.alt}
-						title={imageData.title}
+						alt={`Read ${manga.title} page ${imageData.pageNumber} - ${manga.seoData.topTags.slice(0,2).join(' ')} hentai manga`}
+						title={`Read ${manga.title} page ${imageData.pageNumber} online - ${manga.seoData.topCharacters[0] || ''}`}
 						class="w-full rounded-lg shadow-lg"
 						loading="lazy"
 						decoding="async"

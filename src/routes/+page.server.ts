@@ -34,7 +34,17 @@ interface ComicItem {
     author: { name: string }
 }
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, setHeaders }) => {
+    // Set 10-minute edge cache header
+    if (setHeaders) {
+        setHeaders({
+            'Cache-Control': 'public, max-age=600, stale-while-revalidate=60, immutable'
+        })
+    } else if (typeof globalThis.setHeaders === 'function') {
+        globalThis.setHeaders({
+            'Cache-Control': 'public, max-age=600, stale-while-revalidate=60, immutable'
+        })
+    }
     const PAGE_SIZE = 20
 
     const pageParam = parseInt(url.searchParams.get('page') ?? '1', 10)

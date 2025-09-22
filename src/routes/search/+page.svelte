@@ -83,12 +83,40 @@
 <svelte:head>
 	<title>{data.meta.title}</title>
 	<meta name="description" content={data.meta.description} />
+	<link rel="canonical" href={`https://readhentai.me/search?q=${encodeURIComponent(data.query)}`}/>
+	<meta name="keywords" content={`search, hentai, manga, doujinshi, adult comics, ${data.query}`} />
+	<meta name="robots" content="noindex, follow" />
 	{#if data.meta.prev}
 		<link rel="prev" href={data.meta.prev} />
 	{/if}
 	{#if data.meta.next}
 		<link rel="next" href={data.meta.next} />
 	{/if}
+	<!-- Open Graph tags -->
+	<meta property="og:title" content={data.meta.title} />
+	<meta property="og:description" content={data.meta.description} />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content={`https://readhentai.me/search?q=${encodeURIComponent(data.query)}`} />
+	<meta property="og:site_name" content="Read Hentai" />
+	<!-- Twitter Card -->
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content={data.meta.title} />
+	<meta name="twitter:description" content={data.meta.description} />
+	<!-- Structured Data: ItemList JSON-LD -->
+	<script type="application/ld+json">
+		{JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'ItemList',
+			'name': data.meta.title,
+			'description': data.meta.description,
+			'itemListElement': data.comics.map((comic, i) => ({
+				'@type': 'ListItem',
+				'position': i + 1,
+				'url': `https://readhentai.me/read/${comic.slug}`,
+				'name': comic.title
+			}))
+		})}
+	</script>
 </svelte:head>
 
 <main class="container mx-auto px-4 py-12">

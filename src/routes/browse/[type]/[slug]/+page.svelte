@@ -112,13 +112,18 @@
 </script>
 
 <svelte:head>
-	<title>{data.seo.title}</title>
+	<title>{data.seo.title} | HentaiRead.Me</title>
 	<meta name="description" content={data.seo.description} />
+	<!-- Improved meta description for SEO -->
+	<meta name="description" content={`Browse ${data.name} ${data.typeLabel} hentai manga collection - ${data.seo.description}`} />
 	<meta name="keywords" content={data.seo.keywords} />
+	<!-- Add additional relevant keywords -->
+	<meta name="keywords" content={`hentai, manga, doujinshi, ${data.name}, ${data.typeLabel}, ${data.seo.keywords}`} />
 	<link rel="canonical" href={data.seo.canonical} />
 
 	<!-- Enhanced Open Graph -->
 	<meta property="og:type" content={data.seo.ogType} />
+	<meta property="og:updated_time" content={new Date().toISOString()} />
 	<meta property="og:site_name" content={data.seo.ogSiteName} />
 	<meta property="og:locale" content={data.seo.ogLocale} />
 	<meta property="og:url" content={data.seo.canonical} />
@@ -134,8 +139,7 @@
 	<meta property="og:image:height" content="630" />
 	<meta
 		property="og:image:alt"
-		content="{data.name} {data.typeLabel.toLowerCase()} hentai manga collection"
-	/>
+		content={`Browse ${data.name} ${data.typeLabel.toLowerCase()} hentai manga collection - Free adult doujinshi`} />
 
 	<!-- Enhanced Twitter Cards -->
 	<meta name="twitter:card" content={data.seo.twitterCard} />
@@ -143,6 +147,8 @@
 	<meta name="twitter:title" content={data.seo.twitterTitle} />
 	<meta name="twitter:description" content={data.seo.twitterDescription} />
 	<meta name="twitter:image" content={data.seo.ogImages[0]} />
+	<!-- Add twitter:creator if available -->
+	<meta name="twitter:creator" content="@ReadHentaipics" />
 
 	<!-- Additional SEO -->
 	<meta name="robots" content="index, follow, max-image-preview:large" />
@@ -160,8 +166,27 @@
 		<link rel="next" href={`/browse/${data.type}/${data.slug}?page=${data.page + 1}`} />
 	{/if}
 
-	<!-- Structured Data -->
-	{@html `<script type="application/ld+json">${JSON.stringify(data.seo.structuredData)}</script>`}
+	<!-- Structured Data: Improved for SEO -->
+	{@html `<script type="application/ld+json">${JSON.stringify({
+		"@context": "https://schema.org",
+		"@type": "CollectionPage",
+		"name": `${data.name} ${data.typeLabel} Hentai Manga Collection`,
+		"description": data.seo.description,
+		"url": data.seo.canonical,
+		"keywords": data.seo.keywords,
+		"image": data.seo.ogImages[0],
+		"creator": "Read Hentai Pics",
+		"about": data.name,
+		"genre": data.typeLabel,
+		"mainEntity": data.comics.map(comic => ({
+			"@type": "ComicSeries",
+			"name": comic.title,
+			"image": comic.featureImage,
+			"author": comic.author.name,
+			"keywords": comic.seoData.tags.join(', '),
+			"about": comic.seoData.characters.join(', ')
+		}))
+	})}`}
 </svelte:head>
 
 <main class="container mx-auto px-4 py-8 max-w-7xl">
@@ -367,8 +392,8 @@
 							>
 								<img
 									src={comic.featureImage}
-									alt={comic.seoData.imageAlt}
-									title={comic.seoData.imageTitle}
+									alt={`Read ${comic.title} - ${comic.seoData.imageAlt}`}
+									title={`Read ${comic.title} online - ${comic.seoData.imageTitle}`}
 									class="w-full h-auto aspect-[3/4] object-cover group-hover:scale-105 transition-transform duration-200"
 									loading={index < 8 ? 'eager' : 'lazy'}
 									decoding="async"

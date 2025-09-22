@@ -13,7 +13,17 @@ let cachedMinMax: { minRowid: number; maxRowid: number; ts: number } | null = nu
 let cachedTotal: { total: number; ts: number } | null = null
 const CACHE_TTL = 60 * 1000 // 1 minute
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, setHeaders }) => {
+    // Set 30-minute edge cache header
+    if (setHeaders) {
+        setHeaders({
+            'Cache-Control': 'public, max-age=1800, stale-while-revalidate=120, immutable'
+        })
+    } else if (typeof globalThis.setHeaders === 'function') {
+        globalThis.setHeaders({
+            'Cache-Control': 'public, max-age=1800, stale-while-revalidate=120, immutable'
+        })
+    }
     const PAGE_SIZE = 20
     const WINDOW_MULT = 4 // fetch a small window and sample from it to avoid many DB calls
 

@@ -10,6 +10,8 @@
 <svelte:head>
 	<title>{data.meta.title}</title>
 	<meta name="description" content={data.meta.description} />
+	<link rel="canonical" href="https://readhentai.me" />
+	<meta name="keywords" content="hentai, manga, doujinshi, adult comics, free hentai, read online, popular hentai, latest manga, readhentai.me" />
 	{#if data.meta.prev}
 		<link rel="prev" href={data.meta.prev} />
 	{/if}
@@ -41,6 +43,19 @@
 	/>
 	<meta name="twitter:title" content={data.meta.title} />
 	<meta name="twitter:description" content={data.meta.description} />
+
+	<!-- Structured Data: WebSite JSON-LD -->
+	<script type="application/ld+json">
+		{`
+		{
+		  "@context": "https://schema.org",
+		  "@type": "WebSite",
+		  "name": "Read Hentai Pics",
+		  "url": "https://readhentai.me",
+		  "description": "Discover popular manga, hentai, and doujinshi that others are reading on Read Hentai."
+		}
+		`}
+	</script>
 </svelte:head>
 
 <main class="max-w-6xl mx-auto px-4 py-8">

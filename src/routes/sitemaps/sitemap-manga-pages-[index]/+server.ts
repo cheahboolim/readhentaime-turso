@@ -1,5 +1,5 @@
 // src/routes/sitemaps/sitemap-manga-pages-[index]/+server.ts
-import { supabase } from '$lib/supabaseClient'
+import { db } from '$lib/server/db'
 
 const SITE_URL = 'https://readhentai.me'
 const URLS_PER_SITEMAP = 25000
@@ -20,36 +20,27 @@ export async function GET({ params }) {
 	try {
 		const urls: SitemapUrl[] = []
 		const offset = index * URLS_PER_SITEMAP
+		// Use Turso (SQLite) to select pages with manga_id/page_number, then batch-fetch slugs
+		const q = `SELECT manga_id, page_number FROM pages WHERE manga_id IS NOT NULL ORDER BY manga_id, page_number LIMIT ${URLS_PER_SITEMAP} OFFSET ${offset};`
+		const pagesRes = await db.execute(q)
+		const pageRows = pagesRes?.rows ?? []
 
-		// FIXED: Simplified approach - get pages directly with slug information
-		const { data: pageData } = await supabase
-			.from('pages')
-			.select(
-				`
-        manga_id,
-        page_number,
-        manga!inner(
-          created_at,
-          slug_map!inner(slug)
-        )
-      `
-			)
-			.not('manga_id', 'is', null)
-			.order('manga_id')
-			.order('page_number')
-			.range(offset, offset + URLS_PER_SITEMAP - 1)
+		if (pageRows.length) {
+			// collect unique manga_ids to fetch slugs and created_at
+			const mangaIds = Array.from(new Set(pageRows.map((r: any) => r.manga_id))).map((id) => String(id))
+			const idsList = mangaIds.map((id) => `'${id.replace("'", "''")}'`).join(',')
+			const metaQ = `SELECT m.id AS manga_id, m.created_at, s.slug FROM manga m LEFT JOIN slug_map s ON s.manga_id = m.id AND s.is_primary = 1 WHERE m.id IN (${idsList});`
+			const metaRes = await db.execute(metaQ)
+			const metaRows = (metaRes?.rows ?? []).reduce((acc: any, r: any) => {
+				acc[String(r.manga_id)] = r
+				return acc
+			}, {})
 
-		if (pageData) {
-			for (const page of pageData) {
-				const manga = page.manga as any
-				const slugData = manga.slug_map
-
-				if (slugData && slugData.length > 0 && slugData[0].slug) {
-					const slug = slugData[0].slug
-					const lastmod = manga.created_at
-						? new Date(manga.created_at).toISOString().split('T')[0]
-						: new Date().toISOString().split('T')[0]
-
+			for (const page of pageRows) {
+				const manga = metaRows[String(page.manga_id)]
+				const slug = manga?.slug
+				if (slug) {
+					const lastmod = manga?.created_at ? new Date(manga.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
 					urls.push({
 						loc: `${SITE_URL}/read/${slug}/${page.page_number}`,
 						lastmod,
@@ -65,7 +56,7 @@ export async function GET({ params }) {
 		return new Response(sitemap, {
 			headers: {
 				'Content-Type': 'application/xml',
-				'Cache-Control': 'max-age=86400'
+				'Cache-Control': 'public, max-age=2592000, immutable'
 			}
 		})
 	} catch (error) {
@@ -73,7 +64,7 @@ export async function GET({ params }) {
 		return new Response(generateSitemapXML([]), {
 			headers: {
 				'Content-Type': 'application/xml',
-				'Cache-Control': 'max-age=3600'
+				'Cache-Control': 'public, max-age=3600'
 			}
 		})
 	}

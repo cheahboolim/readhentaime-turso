@@ -53,13 +53,18 @@
 </script>
 
 <svelte:head>
-	<title>{seoData.title}</title>
+	<title>{seoData.title} | HentaiRead.Me</title>
 	<meta name="description" content={seoData.description} />
+	<!-- Improved meta description for SEO -->
+	<meta name="description" content={`Read ${comic.title} - ${seoData.description}`} />
 	<meta name="keywords" content={seoData.keywords} />
+	<!-- Add additional relevant keywords -->
+	<meta name="keywords" content={`hentai, manga, doujinshi, ${comic.title}, ${seoData.keywords}`} />
 	<link rel="canonical" href={seoData.canonical} />
 
 	<!-- Enhanced Open Graph -->
 	<meta property="og:type" content={seoData.ogType} />
+	<meta property="og:updated_time" content={seoData.ogUpdatedTime || seoData.articlePublishedTime} />
 	<meta property="og:site_name" content={seoData.ogSiteName} />
 	<meta property="og:locale" content={seoData.ogLocale} />
 	<meta property="og:url" content={seoData.canonical} />
@@ -70,6 +75,10 @@
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
 	<meta property="og:image:alt" content={comic.seoData.imageAlt} />
+	<!-- Add og:author if available -->
+	{#if seoData.articleAuthor}
+		<meta property="og:author" content={seoData.articleAuthor} />
+	{/if}
 
 	<!-- Article specific OG tags -->
 	{#if seoData.articleAuthor}
@@ -88,6 +97,10 @@
 	<meta name="twitter:description" content={seoData.twitterDescription} />
 	<meta name="twitter:image" content={seoData.twitterImage} />
 	<meta name="twitter:image:alt" content={comic.seoData.imageAlt} />
+	<!-- Add twitter:creator if available -->
+	{#if seoData.articleAuthor}
+		<meta name="twitter:creator" content={seoData.articleAuthor} />
+	{/if}
 
 	<!-- Twitter Labels for Rich Cards -->
 	<meta name="twitter:label1" content="Pages" />
@@ -102,13 +115,24 @@
 	<meta name="author" content={comic.seoData.primaryArtist || 'Read Hentai Pics'} />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<!-- Structured Data -->
-	{@html `<script type="application/ld+json">${JSON.stringify(seoData.structuredData)}</script>`}
+	<!-- Structured Data: Improved for SEO -->
+	{@html `<script type="application/ld+json">${JSON.stringify({
+		...seoData.structuredData,
+		"@type": "ComicSeries",
+		"name": comic.title,
+		"image": comic.feature_image_url,
+		"author": seoData.primaryArtist || "Read Hentai Pics",
+		"datePublished": seoData.articlePublishedTime,
+		"headline": seoData.title,
+		"description": seoData.description,
+		"keywords": seoData.keywords,
+		"url": seoData.canonical
+	})}</script>`}
 </svelte:head>
 
 <main class="container mx-auto px-4 py-8">
 	<!-- Breadcrumb Navigation -->
-	<nav aria-label="Breadcrumb" class="mb-6">
+	<nav aria-label="Breadcrumb" class="mb-6" role="navigation">
 		<ol class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
 			<li><a href="/" class="hover:text-pink-500 transition-colors">Home</a></li>
 			<li class="text-gray-400">/</li>
@@ -127,8 +151,8 @@
 					<a href={`/read/${slug}/1`} class="block">
 						<img
 							src={comic.feature_image_url}
-							alt={comic.seoData.imageAlt}
-							title={comic.seoData.imageTitle}
+							alt={`Read ${comic.title} - ${comic.seoData.imageAlt}`}
+							title={`Read ${comic.title} - ${comic.seoData.imageTitle}`}
 							class="w-full rounded-lg hover:opacity-90 transition shadow-lg"
 							width="600"
 							height="900"
@@ -195,7 +219,7 @@
 			<!-- Right side: Metadata and Actions - Sticky on desktop -->
 			<div class="lg:sticky lg:top-8 space-y-6">
 				<div>
-					<h1 class="text-3xl lg:text-4xl font-bold mb-4">{comic.title}</h1>
+					<h1 class="text-3xl lg:text-4xl font-bold mb-4" id="comic-title">{comic.title}</h1>
 
 					<!-- Enhanced manga info with SEO keywords -->
 					{#if comic.seoData.topCharacters.length > 0 || comic.seoData.topParody}

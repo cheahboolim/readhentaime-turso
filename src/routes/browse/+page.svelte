@@ -14,32 +14,47 @@
 </script>
 
 <svelte:head>
-	<title>{data.meta.title}</title>
+	<title>{data.meta.title} | HentaiRead.Me</title>
 	<meta name="description" content={data.meta.description} />
+	<!-- Improved meta description for SEO -->
+	<meta name="description" content={`Browse hentai, manga, and doujinshi by category - ${data.meta.description}`} />
+	<!-- Add keywords for SEO -->
+	<meta name="keywords" content="hentai, manga, doujinshi, browse, tags, artists, parodies, characters, groups, categories, languages, free adult manga, online" />
 	<meta name="robots" content="index, follow" />
 
 	<!-- Open Graph tags -->
 	<meta property="og:title" content={data.meta.title} />
 	<meta property="og:description" content={data.meta.description} />
 	<meta property="og:type" content="website" />
-	<meta
-		property="og:image"
-		content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/Read Hentai-home.jpg"
-	/>
+	<meta property="og:updated_time" content={new Date().toISOString()} />
+	<meta property="og:image" content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/Read Hentai-home.jpg" />
+	<meta property="og:image:secure_url" content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/Read Hentai-home.jpg" />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
 	<meta property="og:image:type" content="image/jpeg" />
+	<meta property="og:image:alt" content="Browse hentai, manga, doujinshi by category - Free adult manga online" />
 	<meta property="og:url" content="https://readhentai.me/browse" />
 	<meta property="og:site_name" content="Read Hentai" />
 
 	<!-- Twitter Card -->
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta
-		name="twitter:image"
-		content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/Read Hentai-home.jpg"
-	/>
+	<meta name="twitter:image" content="{import.meta.env.PUBLIC_CDN_BASE_URL}/main/Read Hentai-home.jpg" />
 	<meta name="twitter:title" content={data.meta.title} />
 	<meta name="twitter:description" content={data.meta.description} />
+	<meta name="twitter:creator" content="@ReadHentaipics" />
+	<!-- Structured Data: Improved for SEO -->
+	<script type="application/ld+json">
+	{JSON.stringify({
+		"@context": "https://schema.org",
+		"@type": "WebPage",
+		"name": data.meta.title,
+		"description": data.meta.description,
+		"url": "https://readhentai.me/browse",
+		"keywords": "hentai, manga, doujinshi, browse, tags, artists, parodies, characters, groups, categories, languages, free adult manga, online",
+		"image": `${import.meta.env.PUBLIC_CDN_BASE_URL}/main/Read Hentai-home.jpg`,
+		"creator": "Read Hentai Pics"
+	})}
+	</script>
 </svelte:head>
 
 <main class="max-w-6xl mx-auto px-4 py-8">
@@ -182,7 +197,7 @@
 							{#if comic.featureImage}
 								<img
 									src={comic.featureImage}
-									alt={comic.title}
+									alt={`Read ${comic.title} - Free hentai manga online`}
 									class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:opacity-90 transition-opacity"
 									loading="lazy"
 									on:error={(e) => {

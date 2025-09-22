@@ -5,7 +5,17 @@ import { db } from '$lib/server/db'
 /** basic escape for single quotes in SQL literals */
 const esc = (v: string) => v.replace(/'/g, "''")
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, setHeaders }) => {
+  // Set 1-day edge cache header for search results
+  if (setHeaders) {
+    setHeaders({
+      'Cache-Control': 'public, max-age=86400, immutable'
+    })
+  } else if (typeof globalThis.setHeaders === 'function') {
+    globalThis.setHeaders({
+      'Cache-Control': 'public, max-age=86400, immutable'
+    })
+  }
   const query = (url.searchParams.get('q') ?? '').trim()
   const page = Math.max(1, parseInt(url.searchParams.get('page') ?? '1', 10))
   const PAGE_SIZE = 10

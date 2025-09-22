@@ -21,7 +21,7 @@ let cachedRandomComics: any[] | null = null
 let cachedRandomComicsTs = 0
 let cachedIdMinMax: { minRowid: number; maxRowid: number; ts: number } | null = null
 
-export const load: PageServerLoad = async ({ params, url }) => {
+export const load: PageServerLoad = async ({ params, url, setHeaders }) => {
     const slug = params.slug
     const pageParam = params.page ?? '1'
     const pageNum = Math.max(1, parseInt(String(pageParam), 10) || 1)
@@ -29,6 +29,13 @@ export const load: PageServerLoad = async ({ params, url }) => {
     const PREFETCH_RADIUS = 1
     const RELATED_LIMIT = 100
     const RANDOM_LIMIT = 8
+
+    // Set Cache-Control header for Cloudflare edge caching (1 year)
+    if (setHeaders) {
+        setHeaders({
+            'Cache-Control': 'public, max-age=31536000, immutable'
+        })
+    }
 
     if (!slug) throw error(404, 'Not found')
 
